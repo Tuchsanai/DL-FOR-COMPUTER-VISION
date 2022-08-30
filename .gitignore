@@ -1,2 +1,6 @@
 *.DS_Store
-week1/*
+week1/*.DS_Store
+week2/*.DS_Store
+week3/*.DS_Store
+week4/*.DS_Store
+week5/*.DS_Store
