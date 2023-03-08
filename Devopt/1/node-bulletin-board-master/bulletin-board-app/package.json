@@ -7,7 +7,7 @@
   "license": "MIT",
   "dependencies": {
     "bootstrap": "^3.3.6",
-    "ejs": "^2.3.4",
+    "ejs": "^3.1.7",
     "express": "^4.13.3",
     "morgan": "^1.6.1",
     "vue": "^1.0.10",
