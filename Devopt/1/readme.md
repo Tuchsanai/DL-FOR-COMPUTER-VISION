@@ -1,4 +1,3 @@
-# Week 8
 
 # install docker with shell script on Ubuntu 22.04
 
@@ -46,9 +45,16 @@ Ctrl+X, then Y, then Enter.
 ```
 # Make the file executable using the command 
 ```
-chmod +x install-git-docker.sh.
+chmod +x install-git-docker.sh
 ```
 # Run the script using the command 
 ```
-./install-git-docker.sh.
+./install-git-docker.sh
+```
+
+# Allow to run docker without sudo
+
+```
+sudo usermod -aG docker $USER
+
 ```
