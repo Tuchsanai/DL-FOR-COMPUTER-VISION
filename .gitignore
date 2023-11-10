@@ -1,4 +1,11 @@
 
+*.pptx
+/backup
+solution/
+
+
+
+
 ### macOS ###
 # General
 .DS_Store
