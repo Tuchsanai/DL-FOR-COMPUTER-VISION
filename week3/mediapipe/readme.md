@@ -1,10 +1,13 @@
-https://developers.google.com/mediapipe/solutions/guide
+# https://developers.google.com/mediapipe/solutions/guide
+
+
+![ Media Pipe https://developers.google.com/mediapipe/solutions/guide ](https://developers.google.com/static/mediapipe/images/studio/studio_app.png)
 
 
 
-MediaPipe is an open-source framework for building multimodal (video, audio, and sensor data) applied machine learning pipelines. It was developed by Google and is widely used for various real-time applications, including gesture recognition, face detection, object detection, and augmented reality.
 
-Key features of MediaPipe include:
+# MediaPipe is an open-source framework for building multimodal (video, audio, and sensor data) applied machine learning pipelines. It was developed by Google and is widely used for various real-time applications, including gesture recognition, face detection, object detection, and augmented reality.
+## Key features of MediaPipe include:
 
 1. **Cross-platform Functionality**: It works across different platforms such as Android, iOS, and desktops, enabling developers to deploy applications on multiple devices.
 
