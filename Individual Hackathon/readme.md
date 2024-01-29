@@ -10,6 +10,10 @@
 
 - พัก 1 สัปดาห์ 
 
+# การสมัครเข้าโครงการ Super AI 
+- สมัครได้ที่ https://superai.aiat.or.th/ หรือ https://register.superai.aiat.or.th/ ภายในวันที่ 31 มกราคม 2567
+- รายละเอียดโครงการ https://www.facebook.com/SuperAIEngineer/
+
 # สอบ Final Exam 
 
 - โจทย์พิเศษ จะให้โจทย์ล่วงหน้ามากกว่า 12-36 ชั่วโมง
