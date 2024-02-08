@@ -3,6 +3,9 @@
 
 # After Mid-term Individual Hackathhon ประมาณ 7 สัปดาห์ โดยจะมีการทำ Hackathon ทั้งหมดไม่ต่ำกว่า 3-5 ครั้ง ดังนี้ 
 
+# Add image from URL
+![hackathon](messageImage_1707181400986.jpg)
+
 
 - Hackathon Global 36 ขั่วโมง Super AI Engineer                ไม่ต่ำกว่า 1-2 ครั้ง หรือ ตามความเหมาะสม
 
