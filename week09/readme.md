@@ -1,0 +1,1 @@
+https://medium.com/@ogre51/difference-between-autoencoder-ae-and-variational-autoencoder-vae-73004cc7e0fb
