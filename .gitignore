@@ -3,6 +3,9 @@ kaggle.json
 /backup
 solution/
 
+/mlruns
+/results
+
 */mnist
 
 
