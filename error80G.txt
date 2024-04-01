@@ -1,0 +1,45 @@
+Fail to get yarn configuration. internal/modules/cjs/loader.js:638
+    throw err;
+    ^
+
+Error: Cannot find module 'worker_threads'
+    at Function.Module._resolveFilename (internal/modules/cjs/loader.js:636:15)
+    at Function.Module._load (internal/modules/cjs/loader.js:562:25)
+    at Module.require (internal/modules/cjs/loader.js:692:17)
+    at require (internal/modules/cjs/helpers.js:25:18)
+    at /home/tuchsanai/.conda/envs/torch/lib/python3.12/site-packages/jupyterlab/staging/yarn.js:423:2576
+    at Object.<anonymous> (/home/tuchsanai/.conda/envs/torch/lib/python3.12/site-packages/jupyterlab/staging/yarn.js:743:8770)
+    at Module._compile (internal/modules/cjs/loader.js:778:30)
+    at Object.Module._extensions..js (internal/modules/cjs/loader.js:789:10)
+    at Module.load (internal/modules/cjs/loader.js:653:32)
+    at tryModuleLoad (internal/modules/cjs/loader.js:593:12)
+
+[I 2024-03-28 15:35:21.780 ServerApp] jupyter_lsp | extension was successfully linked.
+[I 2024-03-28 15:35:21.783 ServerApp] jupyter_server_terminals | extension was successfully linked.
+[W 2024-03-28 15:35:21.784 LabApp] 'token' has moved from NotebookApp to ServerApp. This config will be passed to ServerApp. Be sure to update your config before our next release.
+[W 2024-03-28 15:35:21.786 ServerApp] ServerApp.token config is deprecated in 2.0. Use IdentityProvider.token.
+[I 2024-03-28 15:35:21.786 ServerApp] jupyterlab | extension was successfully linked.
+[I 2024-03-28 15:35:21.789 ServerApp] notebook | extension was successfully linked.
+[I 2024-03-28 15:35:22.173 ServerApp] notebook_shim | extension was successfully linked.
+[I 2024-03-28 15:35:22.197 ServerApp] notebook_shim | extension was successfully loaded.
+[I 2024-03-28 15:35:22.199 ServerApp] jupyter_lsp | extension was successfully loaded.
+[I 2024-03-28 15:35:22.200 ServerApp] jupyter_server_terminals | extension was successfully loaded.
+[I 2024-03-28 15:35:22.211 LabApp] JupyterLab extension loaded from /home/tuchsanai/.conda/envs/torch/lib/python3.12/site-packages/jupyterlab
+[I 2024-03-28 15:35:22.211 LabApp] JupyterLab application directory is /home/tuchsanai/.conda/envs/torch/share/jupyter/lab
+[I 2024-03-28 15:35:22.211 LabApp] Extension Manager is 'pypi'.
+[I 2024-03-28 15:35:22.235 ServerApp] jupyterlab | extension was successfully loaded.
+[I 2024-03-28 15:35:22.242 ServerApp] notebook | extension was successfully loaded.
+[I 2024-03-28 15:35:22.242 ServerApp] Serving notebooks from local directory: /home/tuchsanai/Github/DL-FOR-COMPUTER-VISION
+[I 2024-03-28 15:35:22.242 ServerApp] Jupyter Server 2.13.0 is running at:
+[I 2024-03-28 15:35:22.242 ServerApp] http://dgx01:9108/lab?token=...
+[I 2024-03-28 15:35:22.242 ServerApp]     http://127.0.0.1:9108/lab?token=...
+[I 2024-03-28 15:35:22.242 ServerApp] Use Control-C to stop this server and shut down all kernels (twice to skip confirmation).
+[I 2024-03-28 15:35:22.449 ServerApp] Skipped non-installed server(s): bash-language-server, dockerfile-language-server-nodejs, javascript-typescript-langserver, jedi-language-server, julia-language-server, pyright, python-language-server, python-lsp-server, r-languageserver, sql-language-server, texlab, typescript-language-server, unified-language-server, vscode-css-languageserver-bin, vscode-html-languageserver-bin, vscode-json-languageserver-bin, yaml-language-server
+[W 2024-03-28 15:35:25.858 ServerApp] 404 GET /api/kernels/eb40e793-ec4c-4b4e-ba49-8c26b934be6a/channels?session_id=6e6f6e64-0f76-49c1-98fe-fd7b54affbc9&token=789 (10.40.29.125): Kernel does not exist: eb40e793-ec4c-4b4e-ba49-8c26b934be6a
+[W 2024-03-28 15:35:25.874 ServerApp] 404 GET /api/kernels/eb40e793-ec4c-4b4e-ba49-8c26b934be6a/channels?session_id=6e6f6e64-0f76-49c1-98fe-fd7b54affbc9&token=[secret] (ea06d6fb6e894515b8f34d5657444327@10.40.29.125) 16.44ms referer=None
+[W 2024-03-28 15:35:33.457 ServerApp] 404 GET /api/kernels/b99732f0-ae3a-45aa-aed4-d73700f3b312/channels?session_id=928596cd-7bfd-4a03-ba0d-791d0224e9c5&token=789 (10.40.29.125): Kernel does not exist: b99732f0-ae3a-45aa-aed4-d73700f3b312
+[W 2024-03-28 15:35:33.458 ServerApp] 404 GET /api/kernels/b99732f0-ae3a-45aa-aed4-d73700f3b312/channels?session_id=928596cd-7bfd-4a03-ba0d-791d0224e9c5&token=[secret] (1821434b5da24d9eb315f10deaf2e4eb@10.40.29.125) 1.08ms referer=None
+srun: Job step aborted: Waiting up to 32 seconds for job step to finish.
+slurmstepd: error: *** JOB 6081 ON dgx01 CANCELLED AT 2024-03-28T18:35:33 DUE TO TIME LIMIT ***
+slurmstepd: error: *** STEP 6081.0 ON dgx01 CANCELLED AT 2024-03-28T18:35:33 DUE TO TIME LIMIT ***
+[C 2024-03-28 18:35:33.954 ServerApp] received signal 15, stopping
