@@ -2,6 +2,7 @@ kaggle.json
 *.pptx
 /backup
 solution/
+**/backup/
 
 /mlruns
 /results
