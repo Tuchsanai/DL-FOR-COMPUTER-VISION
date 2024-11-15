@@ -3,6 +3,7 @@ kaggle.json
 /backup
 solution/
 **/backup/
+**/sokution/
 
 /mlruns
 /results
