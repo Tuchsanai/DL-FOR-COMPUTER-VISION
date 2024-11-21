@@ -3,21 +3,11 @@ kaggle.json
 /backup
 solution/
 **/backup/
-**/sokution/
 
-/mlruns
-/results
-
-*/mnist
-
-# Week 2
-/week2/code/images/
-
-
-*/dogs-cats-images.zip
-*/cat-and-dog.zip
-*/cat-and-dog
-
+# yolo
+**/runs/
+**/yolo-datasets/
+*.pt
 
 ### macOS ###
 # General
