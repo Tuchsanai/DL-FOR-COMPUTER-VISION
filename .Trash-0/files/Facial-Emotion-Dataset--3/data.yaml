@@ -1,0 +1,13 @@
+train: ../train/images
+val: ../valid/images
+test: ../test/images
+
+nc: 7
+names: ['angry', 'disgust', 'fear', 'happy', 'neutral', 'sad', 'surprise']
+
+roboflow:
+  workspace: workenv-dayet
+  project: facial-emotion-dataset-7g1jd-hipbk
+  version: 3
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/workenv-dayet/facial-emotion-dataset-7g1jd-hipbk/dataset/3
