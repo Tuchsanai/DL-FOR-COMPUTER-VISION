@@ -4,7 +4,11 @@ kaggle.json
 solution/
 **/backup/
 
+**/resnet_cifar10/
+
+
 # yolo
+**/logs/
 **/runs/
 **/yolo-datasets/
 **/Facial-Emotion-Dataset--3/
