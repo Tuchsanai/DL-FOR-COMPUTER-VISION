@@ -75,6 +75,48 @@
     * Cosine Similarity: วัดความคล้ายคลึงของเวกเตอร์ข้อความ
     * LLM-based Evaluation: ใช้โมเดลข้างต้นให้คะแนนความสมเหตุสมผลหรือความคล้ายคลึง
 
+    ************ สำคัญ หาวิธีเอง LM-based Evaluation ********** 
+
+    ให้นึกศึกษาเอา code นี้ไป modify ทำ  LM-based Evaluation
+
+
+    ```python
+    def generate(model, messages):
+        tokenizer = AutoTokenizer.from_pretrained(model)
+        tokenizer.pad_token = tokenizer.eos_token
+
+        inputs = tokenizer.apply_chat_template(
+            messages,
+            return_tensors="pt",
+            add_generation_prompt=True
+        ).to("cuda")
+
+        streamer = TextStreamer(tokenizer)
+        model = AutoModelForCausalLM.from_pretrained(
+            model,
+            device_map="auto",
+            quantization_config=quant_config
+        )
+
+        outputs = model.generate(
+            inputs,
+            max_new_tokens=5500,
+            early_stopping=True,
+            temperature=0.1,
+            do_sample=True,
+            top_p=0.95,
+            top_k=50,
+            repetition_penalty=1.15,
+            streamer=streamer,
+            eos_token_id=tokenizer.eos_token_id
+        )
+
+        del tokenizer, streamer, model, inputs, outputs
+        torch.cuda.empty_cache()
+    ```
+
+
+
 4. **การวิเคราะห์และสรุปผล**
 
     * เปรียบเทียบผลลัพธ์จากเมตริกซ์ทั้ง 6 วิธี เพื่อหาโมเดลที่มีประสิทธิภาพสูงสุด
@@ -82,7 +124,7 @@
 
 ### งานที่ต้องส่ง
 
-* **รายงานผลลัพธ์ในรูปแบบ CSV**
+* **รายงานผลลัพธ์ในรูปแบบ CSV และ CODE **
 * คำตอบจากโมเดลทั้ง 3 สำหรับชุดย่อยที่ได้รับมอบหมาย
 * ค่าเมตริกซ์การประเมินทั้ง 6 วิธี พร้อมคำอธิบายวิธีการคำนวณ
 * การวิเคราะห์ว่าโมเดลใดดีที่สุด พร้อมเหตุผลสนับสนุน
@@ -90,9 +132,3 @@
 ### บทสรุป
 
 แบบฝึกหัดนี้นำนักศึกษาเข้าสู่โลกของปัญญาประดิษฐ์ผ่านการใช้โมเดลภาษาอันทรงพลัง เช่น `deepseek-ai/DeepSeek-R1-Distill-Llama-70B`, `Qwen/Qwen2.5-VL-72B-Instruct` และ `meta-llama/Llama-3.3-70B-Instruct` ร่วมกับชุดข้อมูล "Question and Answer with Instruction" นักศึกษาได้ฝึกสร้างคำตอบที่มีคุณภาพและประเมินผลอย่างเป็นระบบ ซึ่งช่วยพัฒนาทั้งทักษะด้านเทคนิคและความเข้าใจในศักยภาพและข้อจำกัดของ AI สมัยใหม่ หวังว่านักศึกษาจะนำประสบการณ์นี้ไปต่อยอดเพื่อสร้างนวัตกรรมในอนาคต!
-
-### คำอธิบาย
-
-ข้อความนี้เป็นการแปลกลับจากภาษาอังกฤษที่ผมสร้างในคำตอบก่อนหน้า โดยปรับให้เหมาะสมกับบริบทภาษาไทย
-รูปแบบ Markdown ยังคงเหมือนเดิม เพื่อให้ใช้งานได้ทันทีในไฟล์ README.md
-หากคุณต้องการให้ปรับแต่งเพิ่มเติมหรือใช้ข้อความอื่นเป็นต้นฉบับ กรุณาแจ้งครับ!
