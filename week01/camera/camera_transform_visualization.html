@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Camera Coordinate Transformation - Interactive Visualization</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #fff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: auto 1fr auto;
+            gap: 20px;
+            padding: 20px;
+            max-width: 1600px;
+            margin: 0 auto;
+            min-height: 100vh;
+        }
+        header {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+        h1 {
+            font-size: 1.8em;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #00d4ff, #7c3aed);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .subtitle {
+            color: #a0a0a0;
+            font-size: 1em;
+        }
+        .viewer-container {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+        }
+        .viewer-title {
+            font-size: 1.2em;
+            font-weight: 600;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+        }
+        .viewer-title.world { color: #00d4ff; }
+        .viewer-title.camera { color: #7c3aed; }
+        .canvas-wrapper {
+            flex: 1;
+            min-height: 350px;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+        canvas {
+            display: block;
+            width: 100% !important;
+            height: 100% !important;
+        }
+        .controls-panel {
+            grid-column: 1 / -1;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+        }
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        .control-group {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 10px;
+        }
+        .control-group h3 {
+            font-size: 0.9em;
+            color: #a0a0a0;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .slider-container {
+            margin-bottom: 10px;
+        }
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 0.85em;
+        }
+        .slider-value {
+            color: #00d4ff;
+            font-weight: 600;
+        }
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.2);
+            outline: none;
+            -webkit-appearance: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00d4ff, #7c3aed);
+            cursor: pointer;
+        }
+        .matrix-display {
+            background: #0d1117;
+            border-radius: 10px;
+            padding: 15px;
+            font-family: 'Consolas', monospace;
+            font-size: 0.75em;
+            overflow-x: auto;
+        }
+        .matrix-display h4 {
+            color: #7c3aed;
+            margin-bottom: 10px;
+        }
+        .matrix-row {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+        .matrix-cell {
+            width: 70px;
+            text-align: right;
+            color: #00d4ff;
+        }
+        .info-panel {
+            grid-column: 1 / -1;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+        }
+        .formula-box {
+            background: #0d1117;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+            font-family: 'Times New Roman', serif;
+            font-size: 1.1em;
+            text-align: center;
+        }
+        .highlight {
+            color: #ffd700;
+            font-weight: bold;
+        }
+        .point-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .point-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 12px;
+            border-radius: 8px;
+            font-family: monospace;
+        }
+        .point-card .label {
+            color: #a0a0a0;
+            font-size: 0.8em;
+            margin-bottom: 5px;
+        }
+        .point-card .coords {
+            color: #00d4ff;
+            font-size: 1em;
+        }
+        .legend {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85em;
+        }
+        .legend-color {
+            width: 15px;
+            height: 15px;
+            border-radius: 3px;
+        }
+        @media (max-width: 900px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎥 Camera Coordinate Transformation</h1>
+            <p class="subtitle">การแปลงพิกัดจาก World Space ไป Camera Space | Interactive Visualization</p>
+        </header>
+
+        <div class="viewer-container">
+            <div class="viewer-title world">🌍 World Space</div>
+            <div class="canvas-wrapper" id="world-canvas"></div>
+        </div>
+
+        <div class="viewer-container">
+            <div class="viewer-title camera">📷 Camera Space</div>
+            <div class="canvas-wrapper" id="camera-canvas"></div>
+        </div>
+
+        <div class="controls-panel">
+            <div class="controls-grid">
+                <div class="control-group">
+                    <h3>📍 Camera Position</h3>
+                    <div class="slider-container">
+                        <div class="slider-label">
+                            <span>X Position</span>
+                            <span class="slider-value" id="cam-x-val">5</span>
+                        </div>
+                        <input type="range" id="cam-x" min="-10" max="10" value="5" step="0.5">
+                    </div>
+                    <div class="slider-container">
+                        <div class="slider-label">
+                            <span>Y Position</span>
+                            <span class="slider-value" id="cam-y-val">3</span>
+                        </div>
+                        <input type="range" id="cam-y" min="-10" max="10" value="3" step="0.5">
+                    </div>
+                    <div class="slider-container">
+                        <div class="slider-label">
+                            <span>Z Position</span>
+                            <span class="slider-value" id="cam-z-val">5</span>
+                        </div>
+                        <input type="range" id="cam-z" min="-10" max="10" value="5" step="0.5">
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <h3>🔄 Camera Rotation (Euler)</h3>
+                    <div class="slider-container">
+                        <div class="slider-label">
+                            <span>Yaw (Y-axis)</span>
+                            <span class="slider-value" id="yaw-val">0°</span>
+                        </div>
+                        <input type="range" id="yaw" min="-180" max="180" value="0" step="5">
+                    </div>
+                    <div class="slider-container">
+                        <div class="slider-label">
+                            <span>Pitch (X-axis)</span>
+                            <span class="slider-value" id="pitch-val">0°</span>
+                        </div>
+                        <input type="range" id="pitch" min="-90" max="90" value="0" step="5">
+                    </div>
+                    <div class="slider-container">
+                        <div class="slider-label">
+                            <span>Roll (Z-axis)</span>
+                            <span class="slider-value" id="roll-val">0°</span>
+                        </div>
+                        <input type="range" id="roll" min="-180" max="180" value="0" step="5">
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <h3>📐 Test Point</h3>
+                    <div class="slider-container">
+                        <div class="slider-label">
+                            <span>Point X</span>
+                            <span class="slider-value" id="pt-x-val">3</span>
+                        </div>
+                        <input type="range" id="pt-x" min="-5" max="5" value="3" step="0.5">
+                    </div>
+                    <div class="slider-container">
+                        <div class="slider-label">
+                            <span>Point Y</span>
+                            <span class="slider-value" id="pt-y-val">2</span>
+                        </div>
+                        <input type="range" id="pt-y" min="-5" max="5" value="2" step="0.5">
+                    </div>
+                    <div class="slider-container">
+                        <div class="slider-label">
+                            <span>Point Z</span>
+                            <span class="slider-value" id="pt-z-val">1</span>
+                        </div>
+                        <input type="range" id="pt-z" min="-5" max="5" value="1" step="0.5">
+                    </div>
+                </div>
+
+                <div class="control-group matrix-display">
+                    <h4>View Matrix V</h4>
+                    <div id="matrix-content">
+                        <!-- Matrix will be populated by JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="info-panel">
+            <h3>📊 Transformation Results</h3>
+            <div class="point-info">
+                <div class="point-card">
+                    <div class="label">Camera Position C (World)</div>
+                    <div class="coords" id="camera-pos">[5.00, 3.00, 5.00]</div>
+                </div>
+                <div class="point-card">
+                    <div class="label">Point P (World Space)</div>
+                    <div class="coords" id="point-world">[3.00, 2.00, 1.00]</div>
+                </div>
+                <div class="point-card">
+                    <div class="label">Point P (Camera Space)</div>
+                    <div class="coords" id="point-camera">[0.00, 0.00, 0.00]</div>
+                </div>
+            </div>
+            
+            <div class="formula-box">
+                <strong>View Matrix Formula:</strong><br><br>
+                V = [R<sub>c</sub><sup>T</sup> | -R<sub>c</sub><sup>T</sup>C]<br>
+                X<sub>cam</sub> = V · X<sub>world</sub>
+            </div>
+
+            <div class="legend">
+                <div class="legend-item"><div class="legend-color" style="background: #ff4444;"></div> X-Axis (Red)</div>
+                <div class="legend-item"><div class="legend-color" style="background: #44ff44;"></div> Y-Axis (Green)</div>
+                <div class="legend-item"><div class="legend-color" style="background: #4444ff;"></div> Z-Axis (Blue)</div>
+                <div class="legend-item"><div class="legend-color" style="background: #00ffff;"></div> Camera</div>
+                <div class="legend-item"><div class="legend-color" style="background: #ff00ff;"></div> Test Point</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Camera parameters
+        let camPos = { x: 5, y: 3, z: 5 };
+        let camRot = { yaw: 0, pitch: 0, roll: 0 };
+        let testPoint = { x: 3, y: 2, z: 1 };
+
+        // Three.js scenes
+        let worldScene, cameraScene;
+        let worldRenderer, cameraRenderer;
+        let worldCamera, cameraCamera;
+        let worldCameraHelper, worldTestPoint;
+        let cameraTestPoint;
+
+        function init() {
+            initWorldView();
+            initCameraView();
+            setupControls();
+            animate();
+            updateVisualization();
+        }
+
+        function createAxes(size = 3) {
+            const group = new THREE.Group();
+            
+            // X axis (red)
+            const xGeom = new THREE.BufferGeometry().setFromPoints([
+                new THREE.Vector3(0, 0, 0),
+                new THREE.Vector3(size, 0, 0)
+            ]);
+            const xMat = new THREE.LineBasicMaterial({ color: 0xff4444, linewidth: 2 });
+            group.add(new THREE.Line(xGeom, xMat));
+            
+            // Y axis (green)
+            const yGeom = new THREE.BufferGeometry().setFromPoints([
+                new THREE.Vector3(0, 0, 0),
+                new THREE.Vector3(0, size, 0)
+            ]);
+            const yMat = new THREE.LineBasicMaterial({ color: 0x44ff44, linewidth: 2 });
+            group.add(new THREE.Line(yGeom, yMat));
+            
+            // Z axis (blue)
+            const zGeom = new THREE.BufferGeometry().setFromPoints([
+                new THREE.Vector3(0, 0, 0),
+                new THREE.Vector3(0, 0, size)
+            ]);
+            const zMat = new THREE.LineBasicMaterial({ color: 0x4444ff, linewidth: 2 });
+            group.add(new THREE.Line(zGeom, zMat));
+            
+            return group;
+        }
+
+        function createCamera() {
+            const group = new THREE.Group();
+            
+            // Camera body
+            const bodyGeom = new THREE.BoxGeometry(0.4, 0.3, 0.5);
+            const bodyMat = new THREE.MeshBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0.7 });
+            const body = new THREE.Mesh(bodyGeom, bodyMat);
+            body.position.z = -0.1;
+            group.add(body);
+            
+            // Lens
+            const lensGeom = new THREE.CylinderGeometry(0.1, 0.15, 0.2, 16);
+            const lensMat = new THREE.MeshBasicMaterial({ color: 0x333333 });
+            const lens = new THREE.Mesh(lensGeom, lensMat);
+            lens.rotation.x = Math.PI / 2;
+            lens.position.z = 0.25;
+            group.add(lens);
+            
+            // Frustum lines
+            const frustumGeom = new THREE.BufferGeometry().setFromPoints([
+                new THREE.Vector3(0, 0, 0),
+                new THREE.Vector3(-0.5, -0.4, 1.5),
+                new THREE.Vector3(0, 0, 0),
+                new THREE.Vector3(0.5, -0.4, 1.5),
+                new THREE.Vector3(0, 0, 0),
+                new THREE.Vector3(0.5, 0.4, 1.5),
+                new THREE.Vector3(0, 0, 0),
+                new THREE.Vector3(-0.5, 0.4, 1.5),
+                new THREE.Vector3(-0.5, -0.4, 1.5),
+                new THREE.Vector3(0.5, -0.4, 1.5),
+                new THREE.Vector3(0.5, 0.4, 1.5),
+                new THREE.Vector3(-0.5, 0.4, 1.5),
+                new THREE.Vector3(-0.5, -0.4, 1.5)
+            ]);
+            const frustumMat = new THREE.LineBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0.5 });
+            group.add(new THREE.Line(frustumGeom, frustumMat));
+            
+            return group;
+        }
+
+        function createPoint(color = 0xff00ff) {
+            const geom = new THREE.SphereGeometry(0.15, 16, 16);
+            const mat = new THREE.MeshBasicMaterial({ color: color });
+            return new THREE.Mesh(geom, mat);
+        }
+
+        function createGrid() {
+            const grid = new THREE.GridHelper(10, 10, 0x444444, 0x222222);
+            grid.rotation.x = Math.PI / 2;
+            return grid;
+        }
+
+        function initWorldView() {
+            const container = document.getElementById('world-canvas');
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+
+            worldScene = new THREE.Scene();
+            worldScene.background = new THREE.Color(0x0d1117);
+
+            worldCamera = new THREE.PerspectiveCamera(60, width / height, 0.1, 100);
+            worldCamera.position.set(10, 8, 10);
+            worldCamera.lookAt(0, 0, 0);
+
+            worldRenderer = new THREE.WebGLRenderer({ antialias: true });
+            worldRenderer.setSize(width, height);
+            container.appendChild(worldRenderer.domElement);
+
+            // Grid
+            worldScene.add(createGrid());
+
+            // World axes
+            worldScene.add(createAxes(4));
+
+            // Camera representation
+            worldCameraHelper = createCamera();
+            worldScene.add(worldCameraHelper);
+
+            // Test point
+            worldTestPoint = createPoint(0xff00ff);
+            worldScene.add(worldTestPoint);
+
+            // Label for origin
+            const originPoint = createPoint(0xffff00);
+            originPoint.position.set(0, 0, 0);
+            originPoint.scale.set(0.5, 0.5, 0.5);
+            worldScene.add(originPoint);
+
+            // Mouse controls
+            let isDragging = false;
+            let previousMousePosition = { x: 0, y: 0 };
+
+            container.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                previousMousePosition = { x: e.clientX, y: e.clientY };
+            });
+
+            document.addEventListener('mouseup', () => {
+                isDragging = false;
+            });
+
+            container.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                const deltaX = e.clientX - previousMousePosition.x;
+                const deltaY = e.clientY - previousMousePosition.y;
+                
+                const radius = worldCamera.position.length();
+                let theta = Math.atan2(worldCamera.position.x, worldCamera.position.z);
+                let phi = Math.acos(worldCamera.position.y / radius);
+                
+                theta -= deltaX * 0.01;
+                phi = Math.max(0.1, Math.min(Math.PI - 0.1, phi + deltaY * 0.01));
+                
+                worldCamera.position.x = radius * Math.sin(phi) * Math.sin(theta);
+                worldCamera.position.y = radius * Math.cos(phi);
+                worldCamera.position.z = radius * Math.sin(phi) * Math.cos(theta);
+                worldCamera.lookAt(0, 0, 0);
+                
+                previousMousePosition = { x: e.clientX, y: e.clientY };
+            });
+
+            container.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                const factor = e.deltaY > 0 ? 1.1 : 0.9;
+                worldCamera.position.multiplyScalar(factor);
+            });
+        }
+
+        function initCameraView() {
+            const container = document.getElementById('camera-canvas');
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+
+            cameraScene = new THREE.Scene();
+            cameraScene.background = new THREE.Color(0x0d1117);
+
+            cameraCamera = new THREE.PerspectiveCamera(60, width / height, 0.1, 100);
+            cameraCamera.position.set(8, 6, 8);
+            cameraCamera.lookAt(0, 0, 0);
+
+            cameraRenderer = new THREE.WebGLRenderer({ antialias: true });
+            cameraRenderer.setSize(width, height);
+            container.appendChild(cameraRenderer.domElement);
+
+            // Grid
+            cameraScene.add(createGrid());
+
+            // Camera space axes (camera is at origin)
+            cameraScene.add(createAxes(4));
+
+            // Test point in camera space
+            cameraTestPoint = createPoint(0xff00ff);
+            cameraScene.add(cameraTestPoint);
+
+            // Mouse controls
+            let isDragging = false;
+            let previousMousePosition = { x: 0, y: 0 };
+
+            container.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                previousMousePosition = { x: e.clientX, y: e.clientY };
+            });
+
+            document.addEventListener('mouseup', () => {
+                isDragging = false;
+            });
+
+            container.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                const deltaX = e.clientX - previousMousePosition.x;
+                const deltaY = e.clientY - previousMousePosition.y;
+                
+                const radius = cameraCamera.position.length();
+                let theta = Math.atan2(cameraCamera.position.x, cameraCamera.position.z);
+                let phi = Math.acos(cameraCamera.position.y / radius);
+                
+                theta -= deltaX * 0.01;
+                phi = Math.max(0.1, Math.min(Math.PI - 0.1, phi + deltaY * 0.01));
+                
+                cameraCamera.position.x = radius * Math.sin(phi) * Math.sin(theta);
+                cameraCamera.position.y = radius * Math.cos(phi);
+                cameraCamera.position.z = radius * Math.sin(phi) * Math.cos(theta);
+                cameraCamera.lookAt(0, 0, 0);
+                
+                previousMousePosition = { x: e.clientX, y: e.clientY };
+            });
+
+            container.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                const factor = e.deltaY > 0 ? 1.1 : 0.9;
+                cameraCamera.position.multiplyScalar(factor);
+            });
+        }
+
+        function setupControls() {
+            const controls = [
+                { id: 'cam-x', val: 'cam-x-val', prop: 'camPos', key: 'x', suffix: '' },
+                { id: 'cam-y', val: 'cam-y-val', prop: 'camPos', key: 'y', suffix: '' },
+                { id: 'cam-z', val: 'cam-z-val', prop: 'camPos', key: 'z', suffix: '' },
+                { id: 'yaw', val: 'yaw-val', prop: 'camRot', key: 'yaw', suffix: '°' },
+                { id: 'pitch', val: 'pitch-val', prop: 'camRot', key: 'pitch', suffix: '°' },
+                { id: 'roll', val: 'roll-val', prop: 'camRot', key: 'roll', suffix: '°' },
+                { id: 'pt-x', val: 'pt-x-val', prop: 'testPoint', key: 'x', suffix: '' },
+                { id: 'pt-y', val: 'pt-y-val', prop: 'testPoint', key: 'y', suffix: '' },
+                { id: 'pt-z', val: 'pt-z-val', prop: 'testPoint', key: 'z', suffix: '' },
+            ];
+
+            controls.forEach(ctrl => {
+                const slider = document.getElementById(ctrl.id);
+                const valDisplay = document.getElementById(ctrl.val);
+                
+                slider.addEventListener('input', () => {
+                    const value = parseFloat(slider.value);
+                    valDisplay.textContent = value + ctrl.suffix;
+                    
+                    if (ctrl.prop === 'camPos') camPos[ctrl.key] = value;
+                    else if (ctrl.prop === 'camRot') camRot[ctrl.key] = value;
+                    else if (ctrl.prop === 'testPoint') testPoint[ctrl.key] = value;
+                    
+                    updateVisualization();
+                });
+            });
+        }
+
+        function degToRad(deg) {
+            return deg * Math.PI / 180;
+        }
+
+        function createRotationMatrix(yaw, pitch, roll) {
+            // Convert to radians
+            const y = degToRad(yaw);
+            const p = degToRad(pitch);
+            const r = degToRad(roll);
+
+            // Rotation matrices
+            const Rz = [
+                [Math.cos(y), -Math.sin(y), 0],
+                [Math.sin(y), Math.cos(y), 0],
+                [0, 0, 1]
+            ];
+
+            const Ry = [
+                [Math.cos(p), 0, Math.sin(p)],
+                [0, 1, 0],
+                [-Math.sin(p), 0, Math.cos(p)]
+            ];
+
+            const Rx = [
+                [1, 0, 0],
+                [0, Math.cos(r), -Math.sin(r)],
+                [0, Math.sin(r), Math.cos(r)]
+            ];
+
+            // R = Rz * Ry * Rx
+            return multiplyMatrices(multiplyMatrices(Rz, Ry), Rx);
+        }
+
+        function multiplyMatrices(A, B) {
+            const result = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
+            for (let i = 0; i < 3; i++) {
+                for (let j = 0; j < 3; j++) {
+                    for (let k = 0; k < 3; k++) {
+                        result[i][j] += A[i][k] * B[k][j];
+                    }
+                }
+            }
+            return result;
+        }
+
+        function transposeMatrix(M) {
+            return [
+                [M[0][0], M[1][0], M[2][0]],
+                [M[0][1], M[1][1], M[2][1]],
+                [M[0][2], M[1][2], M[2][2]]
+            ];
+        }
+
+        function matrixVectorMultiply(M, v) {
+            return [
+                M[0][0] * v[0] + M[0][1] * v[1] + M[0][2] * v[2],
+                M[1][0] * v[0] + M[1][1] * v[1] + M[1][2] * v[2],
+                M[2][0] * v[0] + M[2][1] * v[1] + M[2][2] * v[2]
+            ];
+        }
+
+        function createViewMatrix(Rc, C) {
+            // V = [Rc^T | -Rc^T * C]
+            //     [0    | 1        ]
+            const RcT = transposeMatrix(Rc);
+            const t = matrixVectorMultiply(RcT, C);
+            
+            return [
+                [RcT[0][0], RcT[0][1], RcT[0][2], -t[0]],
+                [RcT[1][0], RcT[1][1], RcT[1][2], -t[1]],
+                [RcT[2][0], RcT[2][1], RcT[2][2], -t[2]],
+                [0, 0, 0, 1]
+            ];
+        }
+
+        function transformPoint(V, p) {
+            // Homogeneous coordinates
+            const ph = [p[0], p[1], p[2], 1];
+            const result = [
+                V[0][0] * ph[0] + V[0][1] * ph[1] + V[0][2] * ph[2] + V[0][3] * ph[3],
+                V[1][0] * ph[0] + V[1][1] * ph[1] + V[1][2] * ph[2] + V[1][3] * ph[3],
+                V[2][0] * ph[0] + V[2][1] * ph[1] + V[2][2] * ph[2] + V[2][3] * ph[3]
+            ];
+            return result;
+        }
+
+        function updateVisualization() {
+            // Create rotation matrix from Euler angles
+            const Rc = createRotationMatrix(camRot.yaw, camRot.pitch, camRot.roll);
+            
+            // Camera position
+            const C = [camPos.x, camPos.y, camPos.z];
+            
+            // Create View Matrix
+            const V = createViewMatrix(Rc, C);
+            
+            // Test point in world space
+            const pWorld = [testPoint.x, testPoint.y, testPoint.z];
+            
+            // Transform to camera space
+            const pCam = transformPoint(V, pWorld);
+            
+            // Update World View
+            worldCameraHelper.position.set(C[0], C[1], C[2]);
+            worldCameraHelper.rotation.set(
+                degToRad(camRot.pitch),
+                degToRad(camRot.yaw),
+                degToRad(camRot.roll),
+                'YXZ'
+            );
+            
+            worldTestPoint.position.set(pWorld[0], pWorld[1], pWorld[2]);
+            
+            // Update Camera View
+            cameraTestPoint.position.set(pCam[0], pCam[1], pCam[2]);
+            
+            // Update UI displays
+            document.getElementById('camera-pos').textContent = 
+                `[${C[0].toFixed(2)}, ${C[1].toFixed(2)}, ${C[2].toFixed(2)}]`;
+            document.getElementById('point-world').textContent = 
+                `[${pWorld[0].toFixed(2)}, ${pWorld[1].toFixed(2)}, ${pWorld[2].toFixed(2)}]`;
+            document.getElementById('point-camera').textContent = 
+                `[${pCam[0].toFixed(2)}, ${pCam[1].toFixed(2)}, ${pCam[2].toFixed(2)}]`;
+            
+            // Update matrix display
+            let matrixHTML = '';
+            for (let i = 0; i < 4; i++) {
+                matrixHTML += '<div class="matrix-row">';
+                for (let j = 0; j < 4; j++) {
+                    matrixHTML += `<span class="matrix-cell">${V[i][j].toFixed(3)}</span>`;
+                }
+                matrixHTML += '</div>';
+            }
+            document.getElementById('matrix-content').innerHTML = matrixHTML;
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            worldRenderer.render(worldScene, worldCamera);
+            cameraRenderer.render(cameraScene, cameraCamera);
+        }
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            const worldContainer = document.getElementById('world-canvas');
+            const cameraContainer = document.getElementById('camera-canvas');
+            
+            worldCamera.aspect = worldContainer.clientWidth / worldContainer.clientHeight;
+            worldCamera.updateProjectionMatrix();
+            worldRenderer.setSize(worldContainer.clientWidth, worldContainer.clientHeight);
+            
+            cameraCamera.aspect = cameraContainer.clientWidth / cameraContainer.clientHeight;
+            cameraCamera.updateProjectionMatrix();
+            cameraRenderer.setSize(cameraContainer.clientWidth, cameraContainer.clientHeight);
+        });
+
+        // Initialize
+        init();
+    </script>
+</body>
+</html>
