@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Robot Arm - Chain Transformations Visualization</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a3e 100%);
+            color: #fff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 20px;
+            padding: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+            min-height: 100vh;
+        }
+        header {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+        }
+        h1 {
+            font-size: 1.6em;
+            background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .subtitle {
+            color: #a0a0a0;
+            font-size: 0.95em;
+            margin-top: 5px;
+        }
+        .viewer-container {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+        }
+        .canvas-wrapper {
+            flex: 1;
+            min-height: 500px;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        canvas {
+            display: block;
+            width: 100% !important;
+            height: 100% !important;
+        }
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .panel {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 15px;
+        }
+        .panel h3 {
+            font-size: 1em;
+            color: #feca57;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+        }
+        .joint-control {
+            margin-bottom: 15px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+        }
+        .joint-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .joint-name {
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+        .joint-value {
+            color: #48dbfb;
+            font-family: monospace;
+            font-size: 0.9em;
+        }
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.2);
+            outline: none;
+            -webkit-appearance: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #48dbfb, #ff6b6b);
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        }
+        .link-length {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 8px;
+        }
+        .link-length label {
+            font-size: 0.8em;
+            color: #aaa;
+        }
+        .link-length input {
+            width: 60px;
+            padding: 4px 8px;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 4px;
+            background: rgba(0,0,0,0.3);
+            color: #fff;
+            font-size: 0.85em;
+        }
+        .matrix-display {
+            background: #0a0a15;
+            border-radius: 8px;
+            padding: 10px;
+            font-family: 'Consolas', monospace;
+            font-size: 0.7em;
+            overflow-x: auto;
+        }
+        .matrix-title {
+            color: #ff6b6b;
+            margin-bottom: 8px;
+            font-size: 0.85em;
+        }
+        .matrix-row {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+        }
+        .matrix-cell {
+            width: 55px;
+            text-align: right;
+            color: #48dbfb;
+        }
+        .end-effector-info {
+            background: rgba(72, 219, 251, 0.1);
+            border: 1px solid rgba(72, 219, 251, 0.3);
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 10px;
+        }
+        .end-effector-info h4 {
+            color: #48dbfb;
+            font-size: 0.9em;
+            margin-bottom: 8px;
+        }
+        .coord-row {
+            display: flex;
+            justify-content: space-between;
+            font-family: monospace;
+            font-size: 0.85em;
+            padding: 3px 0;
+        }
+        .coord-label { color: #aaa; }
+        .coord-value { color: #feca57; }
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85em;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .btn-reset {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a5a);
+            color: white;
+        }
+        .btn-animate {
+            background: linear-gradient(135deg, #48dbfb, #1dd1a1);
+            color: white;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        .chain-visual {
+            margin-top: 10px;
+            padding: 10px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 8px;
+        }
+        .chain-formula {
+            font-family: 'Times New Roman', serif;
+            font-size: 0.9em;
+            text-align: center;
+            color: #feca57;
+            padding: 10px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 6px;
+        }
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.8em;
+        }
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+        }
+        @media (max-width: 900px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🤖 Robot Arm - Chain Transformations</h1>
+            <p class="subtitle">การแปลงพิกัดแบบต่อเนื่อง (Forward Kinematics) | T<sub>total</sub> = T<sub>0</sub> · T<sub>1</sub> · T<sub>2</sub> · T<sub>3</sub></p>
+        </header>
+
+        <div class="viewer-container">
+            <div class="canvas-wrapper" id="robot-canvas"></div>
+            <div class="legend">
+                <div class="legend-item"><div class="legend-color" style="background: #ff4444;"></div> X-Axis</div>
+                <div class="legend-item"><div class="legend-color" style="background: #44ff44;"></div> Y-Axis</div>
+                <div class="legend-item"><div class="legend-color" style="background: #4444ff;"></div> Z-Axis</div>
+                <div class="legend-item"><div class="legend-color" style="background: #ffff00;"></div> End Effector</div>
+            </div>
+        </div>
+
+        <div class="sidebar">
+            <div class="panel">
+                <h3>🔧 Joint Controls</h3>
+                <div id="joint-controls"></div>
+                <div class="btn-group">
+                    <button class="btn btn-reset" onclick="resetJoints()">Reset</button>
+                    <button class="btn btn-animate" onclick="toggleAnimation()">Animate</button>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h3>📐 Chain Formula</h3>
+                <div class="chain-visual">
+                    <div class="chain-formula">
+                        T<sub>world→end</sub> = T<sub>base</sub> · T<sub>1</sub> · T<sub>2</sub> · T<sub>3</sub>
+                    </div>
+                </div>
+                <div class="end-effector-info">
+                    <h4>🎯 End Effector Position</h4>
+                    <div class="coord-row">
+                        <span class="coord-label">X:</span>
+                        <span class="coord-value" id="end-x">0.000</span>
+                    </div>
+                    <div class="coord-row">
+                        <span class="coord-label">Y:</span>
+                        <span class="coord-value" id="end-y">0.000</span>
+                    </div>
+                    <div class="coord-row">
+                        <span class="coord-label">Z:</span>
+                        <span class="coord-value" id="end-z">0.000</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h3>📊 Total Transform Matrix</h3>
+                <div class="matrix-display">
+                    <div id="total-matrix"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Robot configuration
+        const numJoints = 4;
+        let jointAngles = [0, 0, 0, 0];
+        let linkLengths = [1.5, 2.0, 1.5, 1.0];
+        let isAnimating = false;
+        let animationId = null;
+
+        // Three.js setup
+        let scene, camera, renderer;
+        let robotGroup;
+        let joints = [];
+        let links = [];
+        let endEffector;
+
+        function init() {
+            const container = document.getElementById('robot-canvas');
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+
+            // Scene
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x0a0a15);
+
+            // Camera
+            camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 100);
+            camera.position.set(8, 6, 8);
+            camera.lookAt(0, 2, 0);
+
+            // Renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(width, height);
+            container.appendChild(renderer.domElement);
+
+            // Grid
+            const grid = new THREE.GridHelper(10, 10, 0x444444, 0x222222);
+            scene.add(grid);
+
+            // World axes
+            createAxes(scene, new THREE.Vector3(0, 0, 0), 2);
+
+            // Robot
+            robotGroup = new THREE.Group();
+            scene.add(robotGroup);
+            createRobot();
+
+            // Controls
+            createControls();
+
+            // Mouse controls
+            setupMouseControls(container);
+
+            // Initial update
+            updateRobot();
+
+            // Animate
+            animate();
+        }
+
+        function createAxes(parent, origin, size) {
+            const axesGroup = new THREE.Group();
+            
+            // X axis (red)
+            const xGeom = new THREE.BufferGeometry().setFromPoints([
+                new THREE.Vector3(0, 0, 0),
+                new THREE.Vector3(size, 0, 0)
+            ]);
+            axesGroup.add(new THREE.Line(xGeom, new THREE.LineBasicMaterial({ color: 0xff4444 })));
+
+            // Y axis (green)
+            const yGeom = new THREE.BufferGeometry().setFromPoints([
+                new THREE.Vector3(0, 0, 0),
+                new THREE.Vector3(0, size, 0)
+            ]);
+            axesGroup.add(new THREE.Line(yGeom, new THREE.LineBasicMaterial({ color: 0x44ff44 })));
+
+            // Z axis (blue)
+            const zGeom = new THREE.BufferGeometry().setFromPoints([
+                new THREE.Vector3(0, 0, 0),
+                new THREE.Vector3(0, 0, size)
+            ]);
+            axesGroup.add(new THREE.Line(zGeom, new THREE.LineBasicMaterial({ color: 0x4444ff })));
+
+            axesGroup.position.copy(origin);
+            parent.add(axesGroup);
+            return axesGroup;
+        }
+
+        function createRobot() {
+            joints = [];
+            links = [];
+
+            // Base
+            const baseGeom = new THREE.CylinderGeometry(0.4, 0.5, 0.3, 32);
+            const baseMat = new THREE.MeshBasicMaterial({ color: 0x666666 });
+            const base = new THREE.Mesh(baseGeom, baseMat);
+            base.position.y = 0.15;
+            robotGroup.add(base);
+
+            // Create joints and links
+            const jointColors = [0xff6b6b, 0xfeca57, 0x48dbfb, 0x1dd1a1];
+            
+            for (let i = 0; i < numJoints; i++) {
+                // Joint sphere
+                const jointGeom = new THREE.SphereGeometry(0.15, 16, 16);
+                const jointMat = new THREE.MeshBasicMaterial({ color: jointColors[i] });
+                const joint = new THREE.Mesh(jointGeom, jointMat);
+                joints.push(joint);
+                robotGroup.add(joint);
+
+                // Link cylinder
+                const linkGeom = new THREE.CylinderGeometry(0.08, 0.08, 1, 16);
+                const linkMat = new THREE.MeshBasicMaterial({ color: 0x888888, transparent: true, opacity: 0.8 });
+                const link = new THREE.Mesh(linkGeom, linkMat);
+                links.push(link);
+                robotGroup.add(link);
+            }
+
+            // End effector
+            const endGeom = new THREE.ConeGeometry(0.15, 0.3, 16);
+            const endMat = new THREE.MeshBasicMaterial({ color: 0xffff00 });
+            endEffector = new THREE.Mesh(endGeom, endMat);
+            robotGroup.add(endEffector);
+        }
+
+        function updateRobot() {
+            // Forward kinematics
+            let T = new THREE.Matrix4();
+            T.makeTranslation(0, 0.3, 0); // Base height
+
+            const positions = [new THREE.Vector3(0, 0.3, 0)];
+
+            for (let i = 0; i < numJoints; i++) {
+                // Rotation (alternating Z and Y axes)
+                const rotMatrix = new THREE.Matrix4();
+                if (i % 2 === 0) {
+                    rotMatrix.makeRotationZ(jointAngles[i]);
+                } else {
+                    rotMatrix.makeRotationY(jointAngles[i]);
+                }
+                T.multiply(rotMatrix);
+
+                // Translation along local Y (link length)
+                const transMatrix = new THREE.Matrix4();
+                transMatrix.makeTranslation(0, linkLengths[i], 0);
+                T.multiply(transMatrix);
+
+                // Get position
+                const pos = new THREE.Vector3();
+                pos.setFromMatrixPosition(T);
+                positions.push(pos.clone());
+            }
+
+            // Update joint positions
+            for (let i = 0; i < numJoints; i++) {
+                joints[i].position.copy(positions[i]);
+            }
+
+            // Update link positions and orientations
+            for (let i = 0; i < numJoints; i++) {
+                const start = positions[i];
+                const end = positions[i + 1];
+                const mid = new THREE.Vector3().addVectors(start, end).multiplyScalar(0.5);
+                
+                links[i].position.copy(mid);
+                links[i].scale.y = start.distanceTo(end);
+                links[i].lookAt(end);
+                links[i].rotateX(Math.PI / 2);
+            }
+
+            // Update end effector
+            const endPos = positions[positions.length - 1];
+            endEffector.position.copy(endPos);
+
+            // Update UI
+            document.getElementById('end-x').textContent = endPos.x.toFixed(3);
+            document.getElementById('end-y').textContent = endPos.y.toFixed(3);
+            document.getElementById('end-z').textContent = endPos.z.toFixed(3);
+
+            // Update total matrix display
+            updateMatrixDisplay(T);
+        }
+
+        function updateMatrixDisplay(matrix) {
+            const elements = matrix.elements;
+            // Three.js uses column-major order
+            const rows = [
+                [elements[0], elements[4], elements[8], elements[12]],
+                [elements[1], elements[5], elements[9], elements[13]],
+                [elements[2], elements[6], elements[10], elements[14]],
+                [elements[3], elements[7], elements[11], elements[15]]
+            ];
+
+            let html = '';
+            for (const row of rows) {
+                html += '<div class="matrix-row">';
+                for (const val of row) {
+                    html += `<span class="matrix-cell">${val.toFixed(3)}</span>`;
+                }
+                html += '</div>';
+            }
+            document.getElementById('total-matrix').innerHTML = html;
+        }
+
+        function createControls() {
+            const container = document.getElementById('joint-controls');
+            const colors = ['#ff6b6b', '#feca57', '#48dbfb', '#1dd1a1'];
+            const axisLabels = ['Z', 'Y', 'Z', 'Y'];
+
+            for (let i = 0; i < numJoints; i++) {
+                const div = document.createElement('div');
+                div.className = 'joint-control';
+                div.innerHTML = `
+                    <div class="joint-header">
+                        <span class="joint-name" style="color: ${colors[i]}">Joint ${i + 1} (${axisLabels[i]}-axis)</span>
+                        <span class="joint-value" id="angle-val-${i}">0°</span>
+                    </div>
+                    <input type="range" id="angle-${i}" min="-180" max="180" value="0" step="1">
+                    <div class="link-length">
+                        <label>Link Length:</label>
+                        <input type="number" id="length-${i}" value="${linkLengths[i]}" min="0.5" max="3" step="0.1">
+                    </div>
+                `;
+                container.appendChild(div);
+
+                // Angle slider
+                const slider = document.getElementById(`angle-${i}`);
+                slider.addEventListener('input', (e) => {
+                    jointAngles[i] = parseFloat(e.target.value) * Math.PI / 180;
+                    document.getElementById(`angle-val-${i}`).textContent = `${e.target.value}°`;
+                    updateRobot();
+                });
+
+                // Length input
+                const lengthInput = document.getElementById(`length-${i}`);
+                lengthInput.addEventListener('change', (e) => {
+                    linkLengths[i] = parseFloat(e.target.value);
+                    updateRobot();
+                });
+            }
+        }
+
+        function resetJoints() {
+            for (let i = 0; i < numJoints; i++) {
+                jointAngles[i] = 0;
+                document.getElementById(`angle-${i}`).value = 0;
+                document.getElementById(`angle-val-${i}`).textContent = '0°';
+            }
+            updateRobot();
+        }
+
+        function toggleAnimation() {
+            isAnimating = !isAnimating;
+            const btn = document.querySelector('.btn-animate');
+            btn.textContent = isAnimating ? 'Stop' : 'Animate';
+        }
+
+        function setupMouseControls(container) {
+            let isDragging = false;
+            let previousMouse = { x: 0, y: 0 };
+
+            container.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                previousMouse = { x: e.clientX, y: e.clientY };
+            });
+
+            document.addEventListener('mouseup', () => {
+                isDragging = false;
+            });
+
+            container.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+
+                const deltaX = e.clientX - previousMouse.x;
+                const deltaY = e.clientY - previousMouse.y;
+
+                const radius = camera.position.length();
+                let theta = Math.atan2(camera.position.x, camera.position.z);
+                let phi = Math.acos(camera.position.y / radius);
+
+                theta -= deltaX * 0.01;
+                phi = Math.max(0.1, Math.min(Math.PI - 0.1, phi + deltaY * 0.01));
+
+                camera.position.x = radius * Math.sin(phi) * Math.sin(theta);
+                camera.position.y = radius * Math.cos(phi);
+                camera.position.z = radius * Math.sin(phi) * Math.cos(theta);
+                camera.lookAt(0, 2, 0);
+
+                previousMouse = { x: e.clientX, y: e.clientY };
+            });
+
+            container.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                const factor = e.deltaY > 0 ? 1.1 : 0.9;
+                camera.position.multiplyScalar(factor);
+            });
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            if (isAnimating) {
+                const time = Date.now() * 0.001;
+                jointAngles[0] = 0.5 * Math.sin(time);
+                jointAngles[1] = 0.4 * Math.sin(time * 1.3);
+                jointAngles[2] = 0.6 * Math.sin(time * 0.8);
+                jointAngles[3] = 0.3 * Math.cos(time * 1.5);
+
+                // Update sliders
+                for (let i = 0; i < numJoints; i++) {
+                    const deg = Math.round(jointAngles[i] * 180 / Math.PI);
+                    document.getElementById(`angle-${i}`).value = deg;
+                    document.getElementById(`angle-val-${i}`).textContent = `${deg}°`;
+                }
+
+                updateRobot();
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        // Handle resize
+        window.addEventListener('resize', () => {
+            const container = document.getElementById('robot-canvas');
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        });
+
+        // Initialize
+        init();
+    </script>
+</body>
+</html>
