@@ -10,6 +10,9 @@ solution/
 **/resnet_cifar10/
 
 
+muay_thai_clip.mp4
+
+
 # yolo
 **/logs/
 **/runs/
