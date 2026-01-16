@@ -3,6 +3,7 @@ kaggle.json
 /backup
 solution/
 **/backup/
+**/pose_output
 
 **/image-processing-thai-language-image-captioning/
 
