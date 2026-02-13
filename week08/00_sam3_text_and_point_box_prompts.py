@@ -101,7 +101,7 @@
 # Get your token at: https://huggingface.co/settings/tokens
 
 from huggingface_hub import login
-login(token='token')  # <-- Replace with your token
+login(token='token here')  # <-- Replace with your token
 print("✅ Logged in to HuggingFace!")
 
 # %%
