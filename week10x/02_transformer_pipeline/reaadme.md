@@ -1,1 +1,0 @@
-https://huggingface.co/docs/transformers/en/main_classes/pipelines

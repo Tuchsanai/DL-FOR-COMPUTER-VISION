@@ -1,0 +1,3330 @@
+# 🧪 Prompt Engineering Lab with Gemini API — Enhanced Edition
+
+## 📚 Lab Overview & Learning Objectives
+
+Lab นี้ออกแบบมาเพื่อให้ผู้เรียนได้ฝึกฝนเทคนิค **Prompt Engineering** ขั้นสูงผ่าน **Gemini API** โดยเริ่มจากพื้นฐานไปจนถึงเทคนิคขั้นสูง พร้อมระบบ Evaluation ที่ครบถ้วน
+
+### 🎯 Learning Outcomes
+
+- เข้าใจและประยุกต์ใช้เทคนิค Prompt Engineering ขั้นสูง 8 เทคนิค
+- เปรียบเทียบข้อดี-ข้อเสียของแต่ละเทคนิค
+- สามารถเลือกเทคนิคที่เหมาะสมกับปัญหาต่างๆ
+- ประเมินคุณภาพ Output ด้วยวิธีการที่เป็นระบบและหลากหลาย
+
+---
+
+## 🗺️ Lab Roadmap — ภาพรวมเส้นทางการเรียนรู้
+
+```
+╔══════════════════════════════════════════════════════════════════════════════════╗
+║                    🗺️ PROMPT ENGINEERING LEARNING PATH                         ║
+╠══════════════════════════════════════════════════════════════════════════════════╣
+║                                                                                ║
+║  🟢 FOUNDATION (Part 0-2)                                                      ║
+║  ┌─────────────┐    ┌─────────────────┐    ┌──────────────────┐                ║
+║  │  Part 0     │───▶│   Part 1        │───▶│   Part 2         │                ║
+║  │  Setup &    │    │   Few-shot      │    │   Chain-of-      │                ║
+║  │  Connection │    │   Prompting ⭐   │    │   Thought ⭐⭐    │                ║
+║  └─────────────┘    └─────────────────┘    └────────┬─────────┘                ║
+║                                                      │                          ║
+║  🟡 INTERMEDIATE (Part 3-4)                          ▼                          ║
+║  ┌─────────────────────────┐    ┌──────────────────────────┐                   ║
+║  │   Part 3                │    │   Part 4                 │                   ║
+║  │   Self-Consistency      │◄──▶│   Prompt Chaining        │                   ║
+║  │   CoT ⭐⭐⭐              │    │   ⭐⭐⭐                    │                   ║
+║  └────────────┬────────────┘    └────────────┬─────────────┘                   ║
+║               │                               │                                 ║
+║  🟠 ADVANCED (Part 5-8)     ▼               ▼                                 ║
+║  ┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐              ║
+║  │   Part 5         │  │   Part 6         │  │   Part 7         │              ║
+║  │   Reflection     │  │   Tree-of-       │  │   Self-Feedback  │              ║
+║  │   ⭐⭐⭐⭐          │  │   Thought ⭐⭐⭐⭐⭐ │  │   ⭐⭐⭐⭐          │              ║
+║  └────────┬─────────┘  └────────┬─────────┘  └────────┬─────────┘              ║
+║           │                     │                      │                        ║
+║           └─────────────────────┼──────────────────────┘                        ║
+║                                 ▼                                               ║
+║                      ┌──────────────────┐                                       ║
+║                      │   Part 8         │                                       ║
+║                      │   Self-Critique  │                                       ║
+║                      │   ⭐⭐⭐⭐⭐         │                                       ║
+║                      └──────────────────┘                                       ║
+╚══════════════════════════════════════════════════════════════════════════════════╝
+```
+
+---
+
+## 🧠 Prompt Engineering — ทำไมถึงสำคัญ?
+
+### ปัญหาที่ Prompt Engineering แก้ได้
+
+```
+╔═══════════════════════════════════════════════════════════════════╗
+║              🎯 WHY PROMPT ENGINEERING MATTERS                   ║
+╠═══════════════════════════════════════════════════════════════════╣
+║                                                                   ║
+║  ❌ ปัญหาเมื่อไม่ใช้เทคนิค          ✅ เมื่อใช้เทคนิคที่ถูกต้อง  ║
+║  ┌─────────────────────┐         ┌─────────────────────────┐     ║
+║  │ • คำตอบไม่ตรงประเด็น │         │ • คำตอบแม่นยำ ตรงจุด    │     ║
+║  │ • ขาดความสม่ำเสมอ   │   ───▶  │ • Output สม่ำเสมอ       │     ║
+║  │ • มี Hallucination  │         │ • ลด Hallucination      │     ║
+║  │ • ขาดเหตุผลรองรับ   │         │ • มี Reasoning ชัดเจน   │     ║
+║  │ • ไม่สามารถทำงาน    │         │ • ทำงานซับซ้อนได้       │     ║
+║  │   ซับซ้อนได้         │         │ • ประเมินคุณภาพได้      │     ║
+║  └─────────────────────┘         └─────────────────────────┘     ║
+║                                                                   ║
+║  📊 ผลวิจัย: Few-shot + CoT ช่วยเพิ่มความถูกต้องได้ 40-70%      ║
+║     ในงาน Reasoning (Wei et al., 2022)                           ║
+╚═══════════════════════════════════════════════════════════════════╝
+```
+
+### 🌡️ Temperature & Sampling — ผลต่อ Output
+
+```
+╔══════════════════════════════════════════════════════════════╗
+║          🌡️ TEMPERATURE EFFECT ON OUTPUT                     ║
+╠══════════════════════════════════════════════════════════════╣
+║                                                              ║
+║  Temperature = 0.0 (Deterministic)                           ║
+║  ┌─────────────────────────────────────────────┐            ║
+║  │ █████████████████████████░░░░░░░░░░░░░░░░░░ │ "แมว"      ║
+║  │ ██░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ │ "สุนัข"    ║
+║  │ ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ │ "นก"       ║
+║  └─────────────────────────────────────────────┘            ║
+║  → เลือก "แมว" เสมอ (ผลลัพธ์เหมือนเดิมทุกครั้ง)             ║
+║  → เหมาะกับ: Factual Q&A, Math, Classification              ║
+║                                                              ║
+║  Temperature = 0.7 (Balanced)                                ║
+║  ┌─────────────────────────────────────────────┐            ║
+║  │ █████████████████░░░░░░░░░░░░░░░░░░░░░░░░░░ │ "แมว"      ║
+║  │ ██████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ │ "สุนัข"    ║
+║  │ █████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ │ "นก"       ║
+║  └─────────────────────────────────────────────┘            ║
+║  → มีโอกาสเลือกทุกตัว (น้ำหนักตามความน่าจะเป็น)             ║
+║  → เหมาะกับ: Creative writing, Brainstorming                ║
+║                                                              ║
+║  Temperature = 1.5 (Very Creative)                           ║
+║  ┌─────────────────────────────────────────────┐            ║
+║  │ █████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ │ "แมว"      ║
+║  │ ████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ │ "สุนัข"    ║
+║  │ ███████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ │ "นก"       ║
+║  └─────────────────────────────────────────────┘            ║
+║  → ความน่าจะเป็นเกือบเท่ากัน (สุ่มมาก อาจไม่ make sense)   ║
+║  → ⚠️ ระวัง: อาจได้ output ที่ไม่สอดคล้อง                    ║
+╚══════════════════════════════════════════════════════════════╝
+```
+
+---
+
+## 🔧 Part 0: Environment Setup
+
+### 📖 ทฤษฎีพื้นฐาน: Gemini API
+
+**Gemini** คือ Large Language Model (LLM) จาก Google DeepMind ที่รองรับทั้ง text, image, audio, video (Multimodal)
+
+### API Parameters ที่ควรรู้
+
+```
+┌────────────────────┬───────────────────────────────────────┐
+│ Parameter          │ คำอธิบาย                              │
+├────────────────────┼───────────────────────────────────────┤
+│ temperature        │ ความสุ่มของ output (0.0 - 2.0)       │
+│                    │ 0.0 = deterministic, 1.0+ = creative │
+│ top_p              │ Nucleus sampling threshold            │
+│ top_k              │ จำนวน tokens ที่พิจารณา              │
+│ max_output_tokens  │ จำนวน tokens สูงสุดใน response       │
+│ stop_sequences     │ token ที่หยุดสร้าง output            │
+└────────────────────┴───────────────────────────────────────┘
+```
+
+### เมื่อไหร่ใช้ Parameter ใด
+
+- **📊 Task ต้องการความแม่นยำ** (Math, Classification): `temperature = 0.0-0.2`, `top_p = 0.8`
+- **✍️ Task ต้องการความคิดสร้างสรรค์** (Writing, Brainstorming): `temperature = 0.7-1.0`, `top_p = 0.95`
+- **🔄 Task ต้องการความหลากหลาย** (Self-Consistency): `temperature = 0.7-1.0` (ต้องการ diverse outputs)
+
+### 🔑 การขอ API Key จาก Google Gemini
+
+1. เข้าสู่ [Google AI Studio](https://aistudio.google.com/) แล้วลงชื่อเข้าใช้ด้วย Google Account
+2. คลิกที่เมนู **"Get API Key"** ที่แถบด้านซ้าย → คลิกปุ่ม **"Create API Key"**
+3. เลือก Google Cloud Project ที่ต้องการ (หรือสร้างใหม่)
+4. เมื่อได้ API Key แล้ว ให้คลิก **"Copy"** เพื่อคัดลอก
+5. **⚠️ สำคัญ:** เก็บ API Key ไว้ในที่ปลอดภัย อย่าแชร์ให้ผู้อื่น
+
+### 💻 Setup Code
+
+```python
+# ติดตั้ง Library ที่จำเป็น
+# !pip install google-genai
+
+# Import Libraries
+from google import genai
+from google.genai import types
+import json
+import time
+import re
+import math
+from typing import List, Dict, Any, Tuple, Optional
+from collections import Counter
+```
+
+```python
+# กำหนด API Key และ Model
+API_KEY = "YOUR_API_KEY_HERE"  # ใส่ API Key ของคุณ
+MODEL_NAME = "gemini-2.0-flash"
+
+# สร้าง Client
+client = genai.Client(api_key=API_KEY)
+```
+
+```python
+# ทดสอบ Connection
+response = client.models.generate_content(
+    model=MODEL_NAME,
+    contents="สวัสดี! ตอบสั้นๆ ว่าคุณพร้อมทำงานแล้ว"
+)
+print("✅ Connection Test:", response.text)
+```
+
+### Helper Functions สำหรับใช้ตลอดทั้ง Lab
+
+```python
+def call_gemini(prompt: str, temperature: float = 0.0, max_tokens: int = 2048) -> str:
+    """Helper function สำหรับเรียก Gemini API"""
+    response = client.models.generate_content(
+        model=MODEL_NAME,
+        contents=prompt,
+        config=types.GenerateContentConfig(
+            temperature=temperature,
+            max_output_tokens=max_tokens,
+        )
+    )
+    return response.text
+
+def print_section(title: str, content: str, emoji: str = "🔹"):
+    """Helper function สำหรับแสดงผลแบบสวยงาม"""
+    print(f"\n{emoji} {title}")
+    print("─" * 50)
+    print(content)
+    print("─" * 50)
+```
+
+---
+
+## 📘 Part 1: Few-shot Prompting
+
+**ระดับความยาก: ⭐ (เริ่มต้น)**
+
+### 📖 ทฤษฎีเชิงลึก
+
+**Few-shot Prompting** คือเทคนิคที่ให้ตัวอย่าง (examples) จำนวนหนึ่งใน prompt เพื่อช่วยให้ LLM เข้าใจรูปแบบและ pattern ที่ต้องการ
+
+### 📊 สเปกตรัมของ Shot Types
+
+```
+┌──────────────────────────────────────────────────────────────────────┐
+│                    📊 SHOT SPECTRUM                                  │
+│                                                                      │
+│  Zero-shot        One-shot        Few-shot        Many-shot         │
+│  (0 examples)     (1 example)     (2-5 examples)  (6+ examples)    │
+│                                                                      │
+│  ○────────────────●────────────────●────────────────●──────▶        │
+│                                                                      │
+│  Flexibility ◄─────────────────────────────────── Consistency       │
+│  HIGH                                              HIGH              │
+│                                                                      │
+│  Best for:        Best for:       Best for:        Best for:        │
+│  - Simple tasks   - Quick demo    - Complex format - Very specific  │
+│  - General Q&A    - Basic pattern - Consistent     - Custom domain  │
+│  - Model already  - When data     - Classification - Edge cases     │
+│    knows well       is limited    - Transformation   matter         │
+└──────────────────────────────────────────────────────────────────────┘
+```
+
+### 📐 หลักการออกแบบตัวอย่างที่ดี
+
+```
+┌─────────────────────────────────────────────────┐
+│         🎯 GOOD EXAMPLE DESIGN PRINCIPLES       │
+│                                                   │
+│  1. ✅ REPRESENTATIVE (เป็นตัวแทนที่ดี)           │
+│     → เลือกตัวอย่างที่ครอบคลุม cases สำคัญ       │
+│                                                   │
+│  2. ✅ DIVERSE (หลากหลาย)                         │
+│     → ไม่ใช้ตัวอย่างที่คล้ายกันหมด               │
+│                                                   │
+│  3. ✅ FORMATTED (มี format ชัดเจน)               │
+│     → Input/Output แยกกันชัด                      │
+│                                                   │
+│  4. ✅ BALANCED (สมดุล)                            │
+│     → ถ้าเป็น classification ครบทุก class         │
+│                                                   │
+│  5. ❌ AVOID: ตัวอย่างที่ขัดแย้งกัน               │
+│  6. ❌ AVOID: ตัวอย่างที่ยาวเกินไป                │
+│  7. ❌ AVOID: ตัวอย่างที่ ambiguous                │
+└─────────────────────────────────────────────────┘
+```
+
+### 🔬 งานวิจัยที่เกี่ยวข้อง
+
+- **Brown et al. (2020)** — *"Language Models are Few-Shot Learners"* (GPT-3 Paper): พบว่า LLM สามารถเรียนรู้จากตัวอย่างในบริบทได้โดยไม่ต้อง fine-tune
+- **Min et al. (2022)** — *"Rethinking the Role of Demonstrations"*: พบว่า **format** ของตัวอย่างสำคัญกว่า **ความถูกต้อง** ของ label
+
+---
+
+### 🔬 Lab 1.1: Zero-shot vs Few-shot Comparison
+
+**Task:** จำแนกความรู้สึก (Sentiment Analysis) ของรีวิวร้านอาหาร
+
+#### Zero-shot
+
+```python
+zero_shot_prompt = """
+จำแนกความรู้สึกของรีวิวต่อไปนี้เป็น: บวก, ลบ, หรือ กลาง
+
+รีวิว: "อาหารรสชาติดีมาก แต่รอนานไปหน่อย"
+ความรู้สึก:
+"""
+
+response_zero = call_gemini(zero_shot_prompt)
+print_section("Zero-shot Result", response_zero)
+```
+
+#### Few-shot (3 examples)
+
+```python
+few_shot_prompt = """
+จำแนกความรู้สึกของรีวิวร้านอาหารเป็น: บวก, ลบ, หรือ กลาง
+
+ตัวอย่าง 1:
+รีวิว: "อร่อยมากค่ะ บริการดีเยี่ยม จะกลับมาอีกแน่นอน!"
+ความรู้สึก: บวก
+
+ตัวอย่าง 2:
+รีวิว: "ผิดหวังมาก อาหารเย็น พนักงานไม่สุภาพ"
+ความรู้สึก: ลบ
+
+ตัวอย่าง 3:
+รีวิว: "อาหารพอใช้ได้ ราคาก็โอเค ไม่ได้โดดเด่นอะไร"
+ความรู้สึก: กลาง
+
+ตอนนี้จำแนกรีวิวนี้:
+รีวิว: "อาหารรสชาติดีมาก แต่รอนานไปหน่อย"
+ความรู้สึก:
+"""
+
+response_few = call_gemini(few_shot_prompt)
+print_section("Few-shot Result", response_few)
+```
+
+---
+
+### 🔬 Lab 1.2: Few-shot สำหรับ Data Transformation
+
+**Task:** แปลงที่อยู่ไทยเป็น JSON format
+
+```python
+few_shot_address = """
+แปลงที่อยู่ภาษาไทยเป็น JSON format
+
+ตัวอย่าง 1:
+Input: "123/45 ซอยสุขุมวิท 21 ถนนสุขุมวิท แขวงคลองเตยเหนือ เขตวัฒนา กรุงเทพฯ 10110"
+Output: {
+  "house_number": "123/45",
+  "soi": "สุขุมวิท 21",
+  "road": "สุขุมวิท",
+  "subdistrict": "คลองเตยเหนือ",
+  "district": "วัฒนา",
+  "province": "กรุงเทพมหานคร",
+  "postal_code": "10110"
+}
+
+ตัวอย่าง 2:
+Input: "89 หมู่ 5 ตำบลบางพลี อำเภอบางพลี จังหวัดสมุทรปราการ 10540"
+Output: {
+  "house_number": "89",
+  "moo": "5",
+  "subdistrict": "บางพลี",
+  "district": "บางพลี",
+  "province": "สมุทรปราการ",
+  "postal_code": "10540"
+}
+
+ตอนนี้แปลงที่อยู่นี้:
+Input: "456/7 ถนนเพชรบุรีตัดใหม่ แขวงบางกะปิ เขตห้วยขวาง กรุงเทพฯ 10310"
+Output:
+"""
+
+response = call_gemini(few_shot_address)
+print_section("Address Transformation Result", response)
+```
+
+---
+
+### 🔬 Lab 1.3: Few-shot Sensitivity Analysis
+
+ทดลองเปลี่ยนจำนวน examples และดูผลกระทบ
+
+```python
+def test_few_shot_sensitivity(test_input: str, examples: list, test_cases: list = [0, 1, 2, 3]):
+    """
+    ทดสอบว่าจำนวน examples มีผลต่อคุณภาพ output อย่างไร
+    """
+    results = {}
+    
+    for n in test_cases:
+        if n == 0:
+            prompt = f"""จำแนกความรู้สึกของรีวิวเป็น: บวก, ลบ, หรือ กลาง (ตอบแค่คำเดียว)
+
+รีวิว: "{test_input}"
+ความรู้สึก:"""
+        else:
+            selected_examples = examples[:n]
+            examples_text = "\n\n".join(selected_examples)
+            prompt = f"""จำแนกความรู้สึกของรีวิวเป็น: บวก, ลบ, หรือ กลาง (ตอบแค่คำเดียว)
+
+{examples_text}
+
+รีวิว: "{test_input}"
+ความรู้สึก:"""
+        
+        response = call_gemini(prompt)
+        results[f"{n}-shot"] = response.strip()
+        print(f"  {n}-shot → {response.strip()}")
+    
+    return results
+
+examples = [
+    'รีวิว: "อร่อยสุดๆ แนะนำเลย!"\nความรู้สึก: บวก',
+    'รีวิว: "แย่มาก ไม่มาอีกแล้ว"\nความรู้สึก: ลบ',
+    'รีวิว: "ก็ธรรมดา ไม่ได้รู้สึกอะไรเป็นพิเศษ"\nความรู้สึก: กลาง',
+]
+
+print("📊 Few-shot Sensitivity Analysis:")
+print("=" * 40)
+sensitivity_results = test_few_shot_sensitivity(
+    "อาหารรสชาติดี แต่พนักงานไม่ค่อยยิ้มแย้ม ราคาก็กลางๆ",
+    examples
+)
+```
+
+---
+
+## 📘 Part 2: Chain-of-Thought (CoT)
+
+**ระดับความยาก: ⭐⭐ (กลาง)**
+
+### 📖 ทฤษฎีเชิงลึก
+
+**Chain-of-Thought (CoT)** คือเทคนิคที่กระตุ้นให้ LLM แสดงขั้นตอนการคิดอย่างเป็นลำดับก่อนให้คำตอบสุดท้าย ช่วยปรับปรุงความถูกต้องในงานที่ต้องใช้เหตุผล
+
+### 📊 CoT ทำงานอย่างไร
+
+```
+╔═══════════════════════════════════════════════════════════════════╗
+║                  🧠 CHAIN-OF-THOUGHT MECHANISM                   ║
+╠═══════════════════════════════════════════════════════════════════╣
+║                                                                   ║
+║  ❌ Standard Prompting (Direct Answer):                           ║
+║  ┌──────────┐         ┌──────────┐                               ║
+║  │ Question │ ──────▶ │  Answer  │   "Black Box" ❓               ║
+║  └──────────┘         └──────────┘                               ║
+║                                                                   ║
+║  ✅ Chain-of-Thought Prompting:                                   ║
+║  ┌──────────┐   ┌──────┐   ┌──────┐   ┌──────┐   ┌──────────┐  ║
+║  │ Question │──▶│Step 1│──▶│Step 2│──▶│Step 3│──▶│  Answer  │  ║
+║  └──────────┘   └──────┘   └──────┘   └──────┘   └──────────┘  ║
+║                     │          │          │                       ║
+║                 Decompose   Reason    Synthesize                 ║
+║                 (แยกส่วน)  (ให้เหตุผล)  (สรุป)                    ║
+║                                                                   ║
+║  📊 Performance Gain (Wei et al., 2022):                         ║
+║  ┌────────────────────────────────────────────┐                  ║
+║  │ Task          │ Standard │  CoT   │ Gain   │                  ║
+║  │───────────────│──────────│────────│────────│                  ║
+║  │ GSM8K (Math)  │  17.7%   │ 57.1%  │ +39.4% │                  ║
+║  │ SVAMP (Math)  │  63.2%   │ 79.0%  │ +15.8% │                  ║
+║  │ CommonsenseQA │  73.5%   │ 80.5%  │ +7.0%  │                  ║
+║  └────────────────────────────────────────────┘                  ║
+╚═══════════════════════════════════════════════════════════════════╝
+```
+
+### 🔑 Trigger Phrases ที่ใช้กระตุ้น CoT
+
+```
+┌──────────────────────────────────────────────┐
+│         🔑 CoT TRIGGER PHRASES               │
+│                                                │
+│  English:                                      │
+│  • "Let's think step by step"                  │
+│  • "Show your work/reasoning"                  │
+│  • "Explain your thought process"              │
+│  • "Break this down into steps"                │
+│                                                │
+│  ภาษาไทย:                                      │
+│  • "คิดทีละขั้นตอน"                             │
+│  • "แสดงวิธีคิดทุกขั้นตอน"                      │
+│  • "อธิบายกระบวนการคิดของคุณ"                   │
+│  • "แยกปัญหาเป็นส่วนย่อย"                       │
+│                                                │
+│  💡 TIP: ยิ่งเจาะจง ยิ่งดี                      │
+│  แทนที่: "คิดทีละขั้นตอน"                       │
+│  ใช้:   "คิดทีละขั้นตอน: 1)ระบุข้อมูล          │
+│          2)ตั้งสมการ 3)คำนวณ 4)สรุป"            │
+└──────────────────────────────────────────────┘
+```
+
+### CoT Variants
+
+```
+CoT Family:
+├── Zero-shot CoT: "Let's think step by step" (ไม่มีตัวอย่าง)
+├── Few-shot CoT: มีตัวอย่างพร้อม reasoning steps
+├── Self-Consistency CoT: หลาย paths → majority vote (Part 3)
+├── Auto-CoT: ให้ LLM สร้างตัวอย่าง CoT เอง
+└── Multimodal CoT: CoT กับ image + text
+```
+
+---
+
+### 🔬 Lab 2.1: Basic Chain-of-Thought
+
+**Task:** แก้ปัญหาคณิตศาสตร์
+
+#### ❌ Without CoT
+
+```python
+no_cot_prompt = """
+ร้านค้าขายเสื้อ 3 ตัว ราคาตัวละ 250 บาท และกางเกง 2 ตัว ราคาตัวละ 350 บาท
+ถ้าลูกค้าได้ส่วนลด 10% รวมทั้งหมดลูกค้าต้องจ่ายเท่าไหร่?
+"""
+
+response_no_cot = call_gemini(no_cot_prompt)
+print_section("Without CoT", response_no_cot, "❌")
+```
+
+#### ✅ With CoT
+
+```python
+cot_prompt = """
+ร้านค้าขายเสื้อ 3 ตัว ราคาตัวละ 250 บาท และกางเกง 2 ตัว ราคาตัวละ 350 บาท
+ถ้าลูกค้าได้ส่วนลด 10% รวมทั้งหมดลูกค้าต้องจ่ายเท่าไหร่?
+
+กรุณาคิดทีละขั้นตอนอย่างละเอียด แสดงวิธีคิดทุกขั้นตอน
+"""
+
+response_cot = call_gemini(cot_prompt)
+print_section("With CoT", response_cot, "✅")
+```
+
+---
+
+### 🔬 Lab 2.2: CoT สำหรับ Logical Reasoning
+
+**Task:** วิเคราะห์ปัญหาทางธุรกิจ
+
+```python
+cot_business_prompt = """
+บริษัทมีข้อมูลดังนี้:
+- ยอดขายเดือนที่แล้ว: 1,000,000 บาท
+- ต้นทุนสินค้า: 60% ของยอดขาย
+- ค่าใช้จ่ายคงที่: 250,000 บาท
+- เป้าหมายกำไรสุทธิเดือนนี้: เพิ่มขึ้น 20%
+
+คำถาม: บริษัทต้องเพิ่มยอดขายเท่าไหร่ (สมมติต้นทุนและค่าใช้จ่ายคงที่เท่าเดิม)?
+
+กรุณาวิเคราะห์ทีละขั้นตอน:
+1. คำนวณกำไรปัจจุบัน
+2. คำนวณเป้าหมายกำไรใหม่
+3. คำนวณยอดขายที่ต้องการ
+4. สรุปผล
+"""
+
+response = call_gemini(cot_business_prompt)
+print_section("Business Analysis with CoT", response)
+```
+
+---
+
+### 🔬 Lab 2.3: Few-shot CoT
+
+รวม Few-shot กับ CoT เพื่อผลลัพธ์ที่ดียิ่งขึ้น
+
+```python
+few_shot_cot_prompt = """
+แก้ปัญหาคณิตศาสตร์โดยแสดงวิธีคิดทีละขั้นตอน
+
+ตัวอย่าง 1:
+โจทย์: มีแอปเปิ้ล 5 ลูก ซื้อเพิ่มมา 3 ลูก แล้วแบ่งให้เพื่อนไป 2 ลูก เหลือกี่ลูก?
+วิธีคิด:
+- ขั้นตอน 1: มีแอปเปิ้ลเริ่มต้น = 5 ลูก
+- ขั้นตอน 2: ซื้อเพิ่ม = 5 + 3 = 8 ลูก
+- ขั้นตอน 3: แบ่งให้เพื่อน = 8 - 2 = 6 ลูก
+คำตอบ: 6 ลูก
+
+ตัวอย่าง 2:
+โจทย์: รถวิ่งด้วยความเร็ว 60 กม./ชม. ใช้เวลา 2.5 ชั่วโมง วิ่งได้ระยะทางเท่าไหร่?
+วิธีคิด:
+- ขั้นตอน 1: ใช้สูตร ระยะทาง = ความเร็ว × เวลา
+- ขั้นตอน 2: แทนค่า = 60 × 2.5
+- ขั้นตอน 3: คำนวณ = 150 กิโลเมตร
+คำตอบ: 150 กิโลเมตร
+
+ตอนนี้แก้โจทย์นี้:
+โจทย์: ร้านกาแฟขายกาแฟแก้วละ 50 บาท ต้นทุน 20 บาท ถ้าวันนี้ขายได้ 45 แก้ว 
+       และมีค่าเช่าร้านวันละ 500 บาท กำไรสุทธิวันนี้เท่าไหร่?
+วิธีคิด:
+"""
+
+response = call_gemini(few_shot_cot_prompt)
+print_section("Few-shot CoT Result", response)
+```
+
+### 📊 CoT vs Standard: เมื่อไหร่ควรใช้ CoT
+
+```
+┌────────────────────────────────────────────────────────────┐
+│            🎯 WHEN TO USE CoT?                             │
+│                                                            │
+│  ✅ USE CoT:                    ❌ DON'T NEED CoT:         │
+│  • Math problems               • Simple factual Q&A       │
+│  • Logic puzzles                • Translation              │
+│  • Multi-step reasoning         • Summarization            │
+│  • Cause-effect analysis        • Sentiment (simple)       │
+│  • Decision making              • Fill-in-the-blank        │
+│  • Code debugging               • Short creative writing   │
+│  • Business analysis                                       │
+│  • Scientific reasoning                                    │
+│                                                            │
+│  💡 Rule of thumb:                                         │
+│  ถ้ามนุษย์ต้อง "คิด" หลายขั้นตอน → ใช้ CoT              │
+│  ถ้ามนุษย์ตอบได้ทันที → ไม่จำเป็น                         │
+└────────────────────────────────────────────────────────────┘
+```
+
+### 📝 แบบฝึกหัด 2: Chain-of-Thought
+
+**โจทย์:** ใช้ CoT แก้ปัญหานี้:
+
+> "บริษัทมีพนักงาน 50 คน ต้องการเพิ่มเป็น 75 คนภายใน 6 เดือน ถ้าทุก 2 เดือนรับพนักงานใหม่จำนวนเท่าๆ กัน แต่ละรอบต้องรับกี่คน? และถ้าค่าใช้จ่ายในการรับพนักงาน 1 คน = 15,000 บาท ต้องใช้งบประมาณเท่าไหร่?"
+
+```python
+# === แบบฝึกหัด 2: เขียน Code ของคุณที่นี่ ===
+
+# TODO: สร้าง CoT prompt
+cot_exercise_prompt = """
+# เขียน prompt ของคุณที่นี่
+"""
+
+# response = call_gemini(cot_exercise_prompt)
+# print(response)
+```
+
+---
+
+## 📘 Part 3: Self-Consistency Chain-of-Thought
+
+**ระดับความยาก: ⭐⭐⭐ (กลาง-สูง)**
+
+### 📖 ทฤษฎีเชิงลึก
+
+**Self-Consistency CoT** คือเทคนิคที่สร้างคำตอบหลายๆ ครั้ง แล้วเลือกคำตอบที่ consistent (สอดคล้องกัน) มากที่สุด
+
+### 📊 Self-Consistency ทำงานอย่างไร
+
+```
+╔══════════════════════════════════════════════════════════════════════╗
+║              🔄 SELF-CONSISTENCY MECHANISM                          ║
+╠══════════════════════════════════════════════════════════════════════╣
+║                                                                      ║
+║                      ┌──────────┐                                    ║
+║                      │ Question │                                    ║
+║                      └─────┬────┘                                    ║
+║                ┌───────────┼───────────┐                             ║
+║                │           │           │                             ║
+║                ▼           ▼           ▼                             ║
+║         ┌──────────┐ ┌──────────┐ ┌──────────┐                      ║
+║         │ Path 1   │ │ Path 2   │ │ Path 3   │   (temperature > 0) ║
+║         │ Step A   │ │ Step X   │ │ Step P   │                      ║
+║         │ Step B   │ │ Step Y   │ │ Step Q   │                      ║
+║         │ Step C   │ │ Step Z   │ │ Step R   │                      ║
+║         └────┬─────┘ └────┬─────┘ └────┬─────┘                      ║
+║              │           │           │                               ║
+║              ▼           ▼           ▼                               ║
+║         Answer: 42   Answer: 42   Answer: 38                        ║
+║                                                                      ║
+║         ┌─────────────────────────────┐                              ║
+║         │     📊 Majority Vote        │                              ║
+║         │     42: ██████████ (2 votes)│                              ║
+║         │     38: █████ (1 vote)      │                              ║
+║         │                             │                              ║
+║         │     ✅ Final Answer: 42     │                              ║
+║         └─────────────────────────────┘                              ║
+║                                                                      ║
+║  📈 Wang et al. (2023): Self-Consistency improves CoT by 1-24%      ║
+║     on arithmetic and commonsense reasoning benchmarks              ║
+╚══════════════════════════════════════════════════════════════════════╝
+```
+
+### 🔑 ข้อสำคัญ
+
+```
+┌─────────────────────────────────────────────────────────┐
+│            ⚙️ SELF-CONSISTENCY PARAMETERS               │
+│                                                          │
+│  1. Number of Samples (N):                               │
+│     • N = 3-5: ดีสำหรับงานทั่วไป                         │
+│     • N = 10-20: ดีสำหรับงานซับซ้อน                      │
+│     • N = 40+: ตามงานวิจัย (แต่ cost สูง)               │
+│                                                          │
+│  2. Temperature:                                         │
+│     • 0.5-0.8: ดีสำหรับ diverse but reasonable paths    │
+│     • > 1.0: อาจได้ paths ที่ไม่ make sense             │
+│                                                          │
+│  3. Voting Strategy:                                     │
+│     • Majority Vote: เลือกคำตอบที่มากที่สุด              │
+│     • Weighted Vote: ให้น้ำหนักตาม confidence            │
+│     • Plurality: เลือก unique answer ที่มากที่สุด        │
+│                                                          │
+│  4. Cost Consideration:                                  │
+│     • N samples = N × API calls = N × cost              │
+│     • Balance: quality vs. budget                        │
+└─────────────────────────────────────────────────────────┘
+```
+
+---
+
+### 🔬 Lab 3.1: Self-Consistency Implementation
+
+```python
+def self_consistency_cot(prompt: str, num_samples: int = 5, temperature: float = 0.7) -> Dict:
+    """
+    สร้างคำตอบหลายครั้งและเลือกคำตอบที่ consistent ที่สุด
+    """
+    responses = []
+    final_answers = []
+    
+    for i in range(num_samples):
+        response = call_gemini(prompt, temperature=temperature)
+        responses.append(response)
+        
+        # พยายามดึงคำตอบสุดท้าย
+        numbers = re.findall(r'\b\d+(?:,\d{3})*(?:\.\d+)?\b', response)
+        if numbers:
+            final_answers.append(numbers[-1].replace(',', ''))
+        
+        print(f"📝 Sample {i+1}: {response[:200]}...")
+        print("-" * 50)
+        time.sleep(1)  # Rate limiting
+    
+    # นับความถี่ของคำตอบ
+    answer_counts = Counter(final_answers)
+    
+    return {
+        "all_responses": responses,
+        "extracted_answers": final_answers,
+        "answer_distribution": dict(answer_counts),
+        "most_common": answer_counts.most_common(1)[0] if answer_counts else None,
+        "consistency_score": max(answer_counts.values()) / len(final_answers) if final_answers else 0
+    }
+```
+
+#### ทดสอบ Self-Consistency CoT
+
+```python
+problem_prompt = """
+แก้ปัญหานี้โดยแสดงวิธีคิดทีละขั้นตอน:
+
+ร้านอาหารมีโต๊ะ 12 โต๊ะ แต่ละโต๊ะนั่งได้ 4 คน
+วันนี้มีลูกค้ามา 35 คน และอีก 2 กลุ่ม กลุ่มละ 6 คน จะมาทีหลัง
+ถามว่า: ร้านสามารถรองรับลูกค้าทั้งหมดได้หรือไม่? 
+และถ้าได้ จะเหลือที่นั่งว่างกี่ที่?
+
+แสดงวิธีคิด แล้วสรุปคำตอบเป็นตัวเลขที่นั่งที่เหลือ
+"""
+
+print("🔄 Running Self-Consistency CoT (3 samples)...")
+result = self_consistency_cot(problem_prompt, num_samples=3)
+
+print("\n" + "="*50)
+print("📊 Results Summary:")
+print(f"  Answer Distribution: {result['answer_distribution']}")
+print(f"  Most Common Answer: {result['most_common']}")
+print(f"  Consistency Score: {result['consistency_score']:.1%}")
+```
+
+---
+
+### 🔬 Lab 3.2: Advanced Self-Consistency with Weighted Voting
+
+```python
+def advanced_self_consistency(prompt: str, num_samples: int = 5) -> Dict:
+    """
+    Self-Consistency พร้อม confidence scoring
+    """
+    results = []
+    
+    enhanced_prompt = f"""
+{prompt}
+
+หลังจากคิดเสร็จ กรุณาให้:
+1. คำตอบสุดท้าย (ตัวเลขหรือ Yes/No)
+2. ความมั่นใจในคำตอบ (1-10)
+
+Format:
+คำตอบ: [your answer]
+ความมั่นใจ: [1-10]
+"""
+    
+    for i in range(num_samples):
+        response = call_gemini(enhanced_prompt, temperature=0.8)
+        
+        # Extract answer and confidence
+        answer_match = re.search(r'คำตอบ[:\s]*([^\n]+)', response)
+        confidence_match = re.search(r'ความมั่นใจ[:\s]*(\d+)', response)
+        
+        answer = answer_match.group(1).strip() if answer_match else "N/A"
+        confidence = int(confidence_match.group(1)) if confidence_match else 5
+        
+        results.append({
+            "full_response": response,
+            "answer": answer,
+            "confidence": confidence
+        })
+        
+        print(f"  Sample {i+1}: Answer={answer}, Confidence={confidence}/10")
+        time.sleep(1)
+    
+    # Weighted voting
+    weighted_answers = {}
+    for r in results:
+        ans = r["answer"]
+        conf = r["confidence"]
+        weighted_answers[ans] = weighted_answers.get(ans, 0) + conf
+    
+    best_answer = max(weighted_answers, key=weighted_answers.get)
+    
+    return {
+        "results": results,
+        "weighted_scores": weighted_answers,
+        "best_answer": best_answer,
+        "total_confidence": weighted_answers[best_answer]
+    }
+```
+
+#### ทดสอบ Advanced Self-Consistency
+
+```python
+test_prompt = """
+บริษัทกำลังพิจารณาขยายสาขาใหม่ มีข้อมูล:
+- ต้นทุนเปิดสาขา: 2,000,000 บาท
+- รายได้คาดการณ์ต่อเดือน: 350,000 บาท
+- ค่าใช้จ่ายต่อเดือน: 280,000 บาท
+
+คำถาม: กี่เดือนจึงจะคืนทุน? (ตอบเป็นจำนวนเต็ม)
+"""
+
+print("🔄 Running Advanced Self-Consistency...")
+advanced_result = advanced_self_consistency(test_prompt, num_samples=3)
+
+print("\n📊 Weighted Voting Results:")
+print(f"  Weighted Scores: {advanced_result['weighted_scores']}")
+print(f"  Best Answer: {advanced_result['best_answer']}")
+```
+
+---
+
+## 📘 Part 4: Prompt Chaining
+
+**ระดับความยาก: ⭐⭐⭐ (กลาง-สูง)**
+
+### 📖 ทฤษฎีเชิงลึก
+
+**Prompt Chaining** คือเทคนิคที่แบ่งงานซับซ้อนออกเป็นขั้นตอนย่อยๆ โดย output ของ prompt หนึ่งจะเป็น input ของ prompt ถัดไป
+
+### 📊 Prompt Chaining Architecture
+
+```
+╔══════════════════════════════════════════════════════════════════════╗
+║              🔗 PROMPT CHAINING ARCHITECTURE                        ║
+╠══════════════════════════════════════════════════════════════════════╣
+║                                                                      ║
+║  Single Monolithic Prompt (❌ ไม่แนะนำสำหรับงานซับซ้อน):           ║
+║  ┌──────────────────────────────────────────────────┐               ║
+║  │  "ทำ A, B, C, D, E ทั้งหมดพร้อมกัน"              │               ║
+║  │  → มักได้ผลลัพธ์ไม่ดี เพราะ context ยาวเกินไป    │               ║
+║  └──────────────────────────────────────────────────┘               ║
+║                                                                      ║
+║  Prompt Chaining (✅ แนะนำ):                                        ║
+║  ┌─────┐    ┌─────┐    ┌─────┐    ┌─────┐    ┌─────────┐          ║
+║  │ P1  │───▶│ P2  │───▶│ P3  │───▶│ P4  │───▶│ Final   │          ║
+║  │Extract│   │Analyze│  │Plan │   │Refine│   │ Output  │          ║
+║  └─────┘    └─────┘    └─────┘    └─────┘    └─────────┘          ║
+║     │          │          │          │                              ║
+║     └──context──┘──context──┘──context──┘                           ║
+║                                                                      ║
+║  ✨ Benefits:                                                        ║
+║  • แต่ละขั้นตอนมี focus ชัดเจน                                      ║
+║  • ควบคุมคุณภาพแต่ละขั้นตอนได้                                     ║
+║  • Debug ง่าย (รู้ว่าผิดตรงไหน)                                    ║
+║  • สามารถใช้ model ต่างกันในแต่ละขั้น                              ║
+║  • เพิ่ม/ลด ขั้นตอนได้ง่าย                                         ║
+║                                                                      ║
+║  ⚠️ Limitations:                                                     ║
+║  • Latency สูงขึ้น (หลาย API calls)                                ║
+║  • Error propagation (ผิดขั้นแรก → ผิดหมด)                        ║
+║  • Cost เพิ่มขึ้นตามจำนวนขั้นตอน                                   ║
+╚══════════════════════════════════════════════════════════════════════╝
+```
+
+### 📐 Chaining Patterns ที่พบบ่อย
+
+```
+Pattern 1: Sequential (ลำดับ)
+┌─────┐ → ┌─────┐ → ┌─────┐ → ┌─────┐
+│  A  │   │  B  │   │  C  │   │  D  │
+└─────┘   └─────┘   └─────┘   └─────┘
+ตัวอย่าง: Extract → Analyze → Summarize → Format
+
+Pattern 2: Fan-out (กระจาย)
+                   ┌─────┐
+              ┌──▶│  B1 │
+┌─────┐      │    └─────┘
+│  A  │──────┤    ┌─────┐
+└─────┘      ├──▶│  B2 │
+             │    └─────┘
+             │    ┌─────┐
+             └──▶│  B3 │
+                  └─────┘
+ตัวอย่าง: แบ่งบทความ → วิเคราะห์แต่ละส่วนแยก
+
+Pattern 3: Fan-in (รวม)
+┌─────┐
+│  A  │────┐
+└─────┘    │    ┌─────┐
+┌─────┐    ├──▶│  D  │
+│  B  │────┤    └─────┘
+└─────┘    │
+┌─────┐    │
+│  C  │────┘
+└─────┘
+ตัวอย่าง: SWOT + Financial + Market → รวมเป็น Business Plan
+
+Pattern 4: Conditional (เงื่อนไข)
+┌─────┐      YES → ┌─────┐
+│  A  │──────────▶│  B  │
+└─────┘      NO  → ┌─────┐
+                    │  C  │
+                    └─────┘
+ตัวอย่าง: ตรวจสอบ input → ถ้า valid → process, ถ้า invalid → fix
+```
+
+---
+
+### 🔬 Lab 4.1: Basic Prompt Chaining
+
+**Task:** วิเคราะห์และสรุปบทความ
+
+```python
+def prompt_chain_article_analysis(article: str) -> Dict:
+    """
+    Chain สำหรับวิเคราะห์บทความแบบหลายขั้นตอน
+    """
+    results = {}
+    
+    # Step 1: สกัดข้อมูลสำคัญ
+    step1_prompt = f"""
+วิเคราะห์บทความต่อไปนี้และสกัดข้อมูลสำคัญ:
+
+บทความ:
+{article}
+
+กรุณาระบุ:
+1. หัวข้อหลัก (Main Topic)
+2. ประเด็นสำคัญ (Key Points) - ระบุ 3-5 ประเด็น
+3. ข้อมูลตัวเลข/สถิติ (ถ้ามี)
+4. บุคคล/องค์กรที่เกี่ยวข้อง
+
+ตอบในรูปแบบ structured format
+"""
+    
+    response1 = call_gemini(step1_prompt)
+    results["step1_extraction"] = response1
+    print("✅ Step 1: Information Extraction Complete")
+    
+    # Step 2: วิเคราะห์ sentiment และ tone
+    step2_prompt = f"""
+จากข้อมูลที่สกัดได้:
+{results['step1_extraction']}
+
+กรุณาวิเคราะห์:
+1. Sentiment ของบทความ (บวก/ลบ/กลาง)
+2. Tone การเขียน (เป็นทางการ/ไม่เป็นทางการ/วิชาการ)
+3. กลุ่มเป้าหมายของบทความ
+4. วัตถุประสงค์ของผู้เขียน
+"""
+    
+    response2 = call_gemini(step2_prompt)
+    results["step2_analysis"] = response2
+    print("✅ Step 2: Sentiment & Tone Analysis Complete")
+    
+    # Step 3: สร้างสรุปและข้อเสนอแนะ
+    step3_prompt = f"""
+จากการวิเคราะห์:
+
+ข้อมูลสำคัญ:
+{results['step1_extraction']}
+
+การวิเคราะห์:
+{results['step2_analysis']}
+
+กรุณาสร้าง:
+1. สรุปบทความ (3-5 ประโยค)
+2. ข้อเสนอแนะสำหรับผู้อ่าน
+3. คำถามที่ควรพิจารณาต่อ
+4. แหล่งข้อมูลเพิ่มเติมที่ควรศึกษา (แนะนำ)
+"""
+    
+    response3 = call_gemini(step3_prompt)
+    results["step3_summary"] = response3
+    print("✅ Step 3: Summary & Recommendations Complete")
+    
+    return results
+```
+
+#### ทดสอบ Prompt Chaining
+
+```python
+sample_article = """
+กรุงเทพฯ - ธนาคารแห่งประเทศไทยประกาศคงอัตราดอกเบี้ยนโยบายไว้ที่ 2.50% 
+ในการประชุมคณะกรรมการนโยบายการเงิน (กนง.) เมื่อวานนี้ โดยมีมติเอกฉันท์ 7-0 เสียง
+
+นายเศรษฐพุฒิ สุทธิวาทนฤพุฒิ ผู้ว่าการธนาคารแห่งประเทศไทย กล่าวว่า 
+การคงอัตราดอกเบี้ยครั้งนี้เพื่อประเมินผลกระทบของนโยบายการเงินที่ผ่านมา 
+และติดตามสถานการณ์เศรษฐกิจโลกที่ยังมีความไม่แน่นอน
+
+ทั้งนี้ GDP ไทยไตรมาสล่าสุดขยายตัว 2.8% สูงกว่าคาดการณ์ที่ 2.5% 
+ขณะที่เงินเฟ้อทั่วไปอยู่ที่ 0.8% ซึ่งอยู่ในกรอบเป้าหมาย 1-3%
+
+นักวิเคราะห์คาดว่า กนง. จะคงดอกเบี้ยไปจนถึงกลางปีหน้า 
+ก่อนพิจารณาปรับลดหากเศรษฐกิจชะลอตัว
+"""
+
+print("🔗 Starting Prompt Chain Analysis...")
+chain_results = prompt_chain_article_analysis(sample_article)
+```
+
+---
+
+### 🔬 Lab 4.2: Complex Prompt Chaining — Business Analysis
+
+```python
+def business_analysis_chain(company_data: str) -> Dict:
+    """
+    Chain สำหรับวิเคราะห์ธุรกิจแบบครบวงจร
+    """
+    results = {}
+    
+    # Chain 1: SWOT Analysis
+    chain1 = f"""
+วิเคราะห์ SWOT จากข้อมูลบริษัท:
+{company_data}
+
+ระบุ:
+- Strengths (จุดแข็ง): 3-4 ข้อ
+- Weaknesses (จุดอ่อน): 3-4 ข้อ
+- Opportunities (โอกาส): 3-4 ข้อ
+- Threats (ภัยคุกคาม): 3-4 ข้อ
+"""
+    
+    response1 = call_gemini(chain1)
+    results["swot"] = response1
+    print("✅ Chain 1: SWOT Analysis Done")
+    
+    # Chain 2: Strategic Recommendations based on SWOT
+    chain2 = f"""
+จาก SWOT Analysis:
+{results['swot']}
+
+สร้างกลยุทธ์:
+1. SO Strategy (ใช้จุดแข็งคว้าโอกาส)
+2. WO Strategy (แก้จุดอ่อนด้วยโอกาส)
+3. ST Strategy (ใช้จุดแข็งรับมือภัยคุกคาม)
+4. WT Strategy (ลดจุดอ่อนและหลีกเลี่ยงภัยคุกคาม)
+
+ระบุ action items ที่ชัดเจนสำหรับแต่ละกลยุทธ์
+"""
+    
+    response2 = call_gemini(chain2)
+    results["strategies"] = response2
+    print("✅ Chain 2: Strategic Recommendations Done")
+    
+    # Chain 3: Implementation Roadmap
+    chain3 = f"""
+จากกลยุทธ์ที่วางไว้:
+{results['strategies']}
+
+สร้าง Implementation Roadmap:
+1. Quick Wins (0-3 เดือน): สิ่งที่ทำได้ทันที
+2. Short-term (3-6 เดือน): โปรเจกต์ระยะสั้น
+3. Medium-term (6-12 เดือน): แผนระยะกลาง
+4. Long-term (1-2 ปี): วิสัยทัศน์ระยะยาว
+
+ระบุ KPIs สำหรับแต่ละช่วง
+"""
+    
+    response3 = call_gemini(chain3)
+    results["roadmap"] = response3
+    print("✅ Chain 3: Implementation Roadmap Done")
+    
+    return results
+```
+
+#### ทดสอบ Business Analysis Chain
+
+```python
+company_info = """
+บริษัท TechStart Co., Ltd.
+- ธุรกิจ: พัฒนาแอปพลิเคชันมือถือ
+- พนักงาน: 25 คน
+- รายได้ปีที่แล้ว: 15 ล้านบาท
+- ลูกค้าหลัก: SMEs ในประเทศไทย
+- จุดเด่น: ทีมพัฒนาฝีมือดี, ราคาแข่งขันได้
+- ปัญหา: การตลาดยังไม่แข็งแรง, ขาด Product Manager
+- ตลาด: การแข่งขันสูงขึ้น, มี Freelancer เพิ่มขึ้น
+- โอกาส: Digital Transformation กำลังโต, รัฐบาลส่งเสริม Tech Startup
+"""
+
+print("🏢 Starting Business Analysis Chain...")
+business_results = business_analysis_chain(company_info)
+```
+
+---
+
+## 📘 Part 5: Reflection
+
+**ระดับความยาก: ⭐⭐⭐⭐ (สูง)**
+
+### 📖 ทฤษฎีเชิงลึก
+
+**Reflection** คือเทคนิคที่ให้ LLM ทบทวนและประเมินคำตอบของตัวเอง แล้วปรับปรุงให้ดีขึ้น คล้ายกับการ "อ่านทวน" ก่อนส่งงาน
+
+### 📊 Reflection Cycle
+
+```
+╔══════════════════════════════════════════════════════════════════╗
+║                 🔍 REFLECTION CYCLE                              ║
+╠══════════════════════════════════════════════════════════════════╣
+║                                                                  ║
+║         ┌───────────────────┐                                    ║
+║         │  1. GENERATE      │                                    ║
+║         │  สร้างคำตอบแรก    │                                    ║
+║         └────────┬──────────┘                                    ║
+║                  │                                               ║
+║                  ▼                                               ║
+║         ┌───────────────────┐                                    ║
+║         │  2. REFLECT       │                                    ║
+║         │  วิเคราะห์จุดอ่อน  │◄──────────┐                       ║
+║         └────────┬──────────┘           │                        ║
+║                  │                      │                        ║
+║                  ▼                      │  Loop until            ║
+║         ┌───────────────────┐           │  satisfied             ║
+║         │  3. IMPROVE       │           │  (or max               ║
+║         │  ปรับปรุงตาม      │───────────┘   iterations)          ║
+║         │  ผลวิเคราะห์      │                                    ║
+║         └────────┬──────────┘                                    ║
+║                  │                                               ║
+║                  ▼                                               ║
+║         ┌───────────────────┐                                    ║
+║         │  4. FINAL OUTPUT  │                                    ║
+║         │  คำตอบที่ปรับปรุง  │                                    ║
+║         └───────────────────┘                                    ║
+║                                                                  ║
+║  Reflection vs. เทคนิคอื่น:                                     ║
+║  ┌──────────────┬────────────────────────────────────┐          ║
+║  │ Technique    │ Focus                               │          ║
+║  │──────────────│────────────────────────────────────│          ║
+║  │ Reflection   │ ทบทวนภาพรวม, ปรับปรุงทั่วไป        │          ║
+║  │ Self-Feedback│ ประเมินตามเกณฑ์เฉพาะ               │          ║
+║  │ Self-Critique│ วิพากษ์อย่างเข้มงวด, หาข้อผิดพลาด  │          ║
+║  └──────────────┴────────────────────────────────────┘          ║
+╚══════════════════════════════════════════════════════════════════╝
+```
+
+### 🔬 งานวิจัยที่เกี่ยวข้อง
+
+- **Madaan et al. (2023)** — *"Self-Refine" framework*: LLM ที่ refine output ของตัวเองซ้ำๆ ได้ผลดีกว่า single-pass 5-20%
+- **Shinn et al. (2023)** — *"Reflexion: Language Agents with Verbal Reinforcement Learning"*: ใช้ verbal reflection เป็น feedback signal แทน scalar reward
+
+---
+
+### 🔬 Lab 5.1: Basic Reflection Pattern
+
+```python
+def reflection_prompt(task: str) -> Dict:
+    """
+    Reflection pattern: Generate -> Reflect -> Improve
+    """
+    results = {}
+    
+    # Step 1: Initial Response
+    initial_prompt = f"""
+{task}
+
+ให้คำตอบที่ดีที่สุดของคุณ
+"""
+    
+    response1 = call_gemini(initial_prompt)
+    results["initial_response"] = response1
+    print_section("Initial Response", response1, "📝")
+    
+    # Step 2: Reflection
+    reflect_prompt = f"""
+ทบทวนคำตอบต่อไปนี้:
+
+คำถาม/งาน:
+{task}
+
+คำตอบที่ให้ไป:
+{results['initial_response']}
+
+กรุณาวิเคราะห์:
+1. จุดแข็งของคำตอบ (2-3 ข้อ)
+2. จุดอ่อนหรือสิ่งที่ขาดหาย (2-3 ข้อ)
+3. ข้อผิดพลาดที่อาจมี
+4. สิ่งที่ควรเพิ่มเติม
+"""
+    
+    response2 = call_gemini(reflect_prompt)
+    results["reflection"] = response2
+    print_section("Reflection", response2, "🔍")
+    
+    # Step 3: Improved Response
+    improvement_prompt = f"""
+จากการทบทวน:
+
+คำถาม/งานเดิม:
+{task}
+
+คำตอบเดิม:
+{results['initial_response']}
+
+ผลการวิเคราะห์:
+{results['reflection']}
+
+กรุณาสร้างคำตอบใหม่ที่ปรับปรุงแล้ว โดยแก้ไขจุดอ่อนและเพิ่มเติมสิ่งที่ขาดหาย
+"""
+    
+    response3 = call_gemini(improvement_prompt)
+    results["improved_response"] = response3
+    print_section("Improved Response", response3, "✨")
+    
+    return results
+```
+
+#### ทดสอบ Reflection
+
+```python
+task = """
+เขียนอีเมลขอโทษลูกค้าที่สินค้าส่งล่าช้า 3 วัน 
+โดยให้เหตุผลและเสนอชดเชย
+"""
+
+print("🔄 Starting Reflection Process...")
+reflection_results = reflection_prompt(task)
+```
+
+---
+
+### 🔬 Lab 5.2: Multi-round Reflection
+
+```python
+def iterative_reflection(task: str, max_iterations: int = 3) -> Dict:
+    """
+    Reflection หลายรอบจนกว่าจะพอใจ
+    """
+    results = {"iterations": []}
+    
+    current_response = None
+    
+    for i in range(max_iterations):
+        print(f"\n🔄 Iteration {i + 1}")
+        print("=" * 50)
+        
+        if current_response is None:
+            # First iteration: Generate initial response
+            prompt = f"{task}\n\nให้คำตอบที่ดีที่สุดของคุณ"
+        else:
+            # Subsequent iterations: Reflect and improve
+            prompt = f"""
+คำถาม/งาน:
+{task}
+
+คำตอบปัจจุบัน:
+{current_response}
+
+กรุณา:
+1. วิเคราะห์ว่าคำตอบนี้ดีพอหรือยัง (ตอบ YES หรือ NO)
+2. ถ้า NO: ระบุจุดที่ต้องปรับปรุงและสร้างคำตอบใหม่ที่ดีกว่า
+3. ถ้า YES: ยืนยันคำตอบและอธิบายว่าทำไมถึงดีแล้ว
+
+Format:
+STATUS: [YES/NO]
+ANALYSIS: [การวิเคราะห์]
+RESPONSE: [คำตอบ - ถ้า NO ให้คำตอบใหม่, ถ้า YES ให้คำตอบเดิม]
+"""
+        
+        response = call_gemini(prompt, temperature=0.3)
+        
+        results["iterations"].append({
+            "iteration": i + 1,
+            "response": response
+        })
+        
+        print(response[:500] + "..." if len(response) > 500 else response)
+        
+        # Check if satisfied
+        if "STATUS: YES" in response.upper() or "STATUS:YES" in response.upper():
+            print("\n✅ Reflection Complete - Satisfied with response")
+            break
+        
+        current_response = response
+        time.sleep(1)
+    
+    results["final_response"] = results["iterations"][-1]["response"]
+    results["num_iterations"] = len(results["iterations"])
+    return results
+```
+
+#### ทดสอบ Iterative Reflection
+
+```python
+complex_task = """
+ออกแบบ Loyalty Program สำหรับร้านกาแฟที่มี 3 สาขา
+โดยต้องคำนึงถึง:
+- งบประมาณจำกัด
+- ต้องการเพิ่ม repeat customers 30%
+- ใช้เทคโนโลยีที่เรียบง่าย
+"""
+
+print("🔄 Starting Iterative Reflection...")
+iter_results = iterative_reflection(complex_task, max_iterations=3)
+print(f"\n📊 Total iterations: {iter_results['num_iterations']}")
+```
+
+---
+
+## 📘 Part 6: Tree-of-Thought (ToT)
+
+**ระดับความยาก: ⭐⭐⭐⭐⭐ (สูงมาก)**
+
+### 📖 ทฤษฎีเชิงลึก
+
+**Tree-of-Thought (ToT)** คือเทคนิคที่สำรวจหลายเส้นทางการคิดพร้อมกัน เหมือนการเล่นหมากรุกที่พิจารณาหลายๆ ตาล่วงหน้า
+
+### 📊 ToT Architecture
+
+```
+╔══════════════════════════════════════════════════════════════════════╗
+║                 🌳 TREE-OF-THOUGHT ARCHITECTURE                     ║
+╠══════════════════════════════════════════════════════════════════════╣
+║                                                                      ║
+║  CoT (Linear):     ToT (Branching):                                 ║
+║  ●→●→●→●           ●─┬─●─┬─●──── ✅ Best                            ║
+║  (1 path)          │  │  └─●──── ❌ Pruned                          ║
+║                    │  └─●─┬─●──── ❌ Pruned                          ║
+║                    │     └─●──── ❌ Pruned                           ║
+║                    └─●─┬─●──── ❌ Pruned                             ║
+║                       └─●──── ❌ Pruned                              ║
+║                                                                      ║
+║  Process:                                                            ║
+║  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐            ║
+║  │1.GENERATE│─▶│2.EVALUATE│─▶│3.EXPAND  │─▶│4.SELECT  │            ║
+║  │ Branches │  │ Score    │  │ Best     │  │ Final    │            ║
+║  │ (BFS/DFS)│  │ each    │  │ branch   │  │ answer   │            ║
+║  └──────────┘  └──────────┘  └──────────┘  └──────────┘            ║
+║                                                                      ║
+║  🔑 Search Strategies:                                               ║
+║  ┌───────────────────────────────────────────────────────┐          ║
+║  │ BFS (Breadth-First)     │ DFS (Depth-First)          │          ║
+║  │ • ดูทุก branch ในระดับ   │ • ไล่ลึกทีละ branch        │          ║
+║  │   เดียวกันก่อน           │ • ใช้ memory น้อยกว่า      │          ║
+║  │ • เหมาะกับ decision     │ • เหมาะกับปัญหาที่มี      │          ║
+║  │   making tasks          │   solution ลึก             │          ║
+║  └───────────────────────────────────────────────────────┘          ║
+║                                                                      ║
+║  📈 Yao et al. (2023): ToT improves GPT-4 on "Game of 24"          ║
+║     from 4% (CoT) to 74% success rate                               ║
+╚══════════════════════════════════════════════════════════════════════╝
+```
+
+### ToT vs CoT vs Self-Consistency
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│              🔄 TECHNIQUE COMPARISON                         │
+│                                                               │
+│ Technique          │ Paths │ Evaluation │ Best For           │
+│────────────────────│───────│────────────│────────────────────│
+│ CoT                │   1   │    No      │ Simple reasoning   │
+│ Self-Consistency   │   N   │  Voting    │ Math, factual Q&A  │
+│ Tree-of-Thought    │   N   │ Per-step   │ Complex planning,  │
+│                    │       │ scoring    │ creative problem   │
+│                    │       │            │ solving            │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+### 🔬 Lab 6.1: Tree-of-Thought Implementation
+
+```python
+def tree_of_thought(problem: str, num_branches: int = 3, depth: int = 2) -> Dict:
+    """
+    Tree-of-Thought: สำรวจหลายเส้นทางการแก้ปัญหา
+    """
+    results = {
+        "problem": problem,
+        "tree": {}
+    }
+    
+    # Step 1: Generate initial branches (approaches)
+    generate_prompt = f"""
+พิจารณาปัญหา:
+{problem}
+
+สร้าง {num_branches} แนวทางการแก้ปัญหาที่แตกต่างกัน
+สำหรับแต่ละแนวทาง ให้:
+1. ชื่อแนวทาง
+2. แนวคิดหลัก
+3. ขั้นตอนแรกที่จะทำ
+
+Format:
+APPROACH 1:
+Name: [ชื่อ]
+Concept: [แนวคิด]
+First Step: [ขั้นตอนแรก]
+
+APPROACH 2:
+...
+"""
+    
+    response1 = call_gemini(generate_prompt, temperature=0.7)
+    results["tree"]["initial_branches"] = response1
+    print_section("Initial Branches", response1, "🌳")
+    
+    # Step 2: Evaluate each branch
+    evaluate_prompt = f"""
+ประเมินแนวทางการแก้ปัญหาเหล่านี้:
+
+ปัญหา:
+{problem}
+
+แนวทางที่เสนอ:
+{results['tree']['initial_branches']}
+
+สำหรับแต่ละแนวทาง ให้คะแนน 1-10 ในด้าน:
+1. ความเป็นไปได้ (Feasibility)
+2. ประสิทธิภาพ (Effectiveness)
+3. ความเสี่ยง (Risk - คะแนนสูง = ความเสี่ยงต่ำ)
+4. ทรัพยากรที่ต้องใช้ (Resources - คะแนนสูง = ใช้น้อย)
+
+สรุปคะแนนรวมและจัดอันดับ
+"""
+    
+    response2 = call_gemini(evaluate_prompt)
+    results["tree"]["evaluation"] = response2
+    print_section("Branch Evaluation", response2, "📊")
+    
+    # Step 3: Expand best branch
+    expand_prompt = f"""
+จากการประเมิน:
+{results['tree']['evaluation']}
+
+เลือกแนวทางที่ดีที่สุด และขยายรายละเอียด:
+
+1. อธิบายแผนการดำเนินงานโดยละเอียด
+2. ระบุ milestones สำคัญ
+3. คาดการณ์อุปสรรคและวิธีรับมือ
+4. ทรัพยากรที่ต้องเตรียม
+5. Timeline คร่าวๆ
+"""
+    
+    response3 = call_gemini(expand_prompt)
+    results["tree"]["expanded_solution"] = response3
+    print_section("Expanded Best Solution", response3, "🎯")
+    
+    return results
+```
+
+#### ทดสอบ Tree-of-Thought
+
+```python
+business_problem = """
+ร้านหนังสือเล็กๆ กำลังประสบปัญหายอดขายลดลง 40% 
+เนื่องจากการแข่งขันจาก e-commerce และ e-book
+มีงบประมาณสำหรับปรับปรุง 500,000 บาท
+ต้องการหาทางรอดภายใน 1 ปี
+"""
+
+print("🌳 Starting Tree-of-Thought Analysis...")
+tot_results = tree_of_thought(business_problem)
+```
+
+---
+
+## 📘 Part 7: Self-Feedback
+
+**ระดับความยาก: ⭐⭐⭐⭐ (สูง)**
+
+### 📖 ทฤษฎีเชิงลึก
+
+**Self-Feedback** คือเทคนิคที่ให้ LLM สร้าง feedback ให้ตัวเองตามเกณฑ์ที่กำหนด แล้วใช้ feedback นั้นปรับปรุงคำตอบ
+
+### ความแตกต่างจาก Reflection
+
+```
+┌────────────────────────────────────────────────────────┐
+│           🔍 REFLECTION vs SELF-FEEDBACK                │
+│                                                          │
+│  Reflection:                                             │
+│  • ทบทวนภาพรวมทั่วไป                                    │
+│  • ไม่มีเกณฑ์ตายตัว                                     │
+│  • เหมือน "อ่านทวน"                                     │
+│                                                          │
+│  Self-Feedback:                                          │
+│  • ใช้ rubric/criteria เฉพาะ                             │
+│  • ให้คะแนนตามเกณฑ์                                     │
+│  • เหมือน "ตรวจตาม marking scheme"                      │
+│                                                          │
+│  Example Criteria:                                       │
+│  ┌──────────────────────────┐                           │
+│  │ Accuracy     ████████░░ 8/10  │                      │
+│  │ Completeness █████████░ 9/10  │                      │
+│  │ Clarity      ███████░░░ 7/10  │  ← ต้องปรับปรุง    │
+│  │ Engagement   ██████░░░░ 6/10  │  ← ต้องปรับปรุง    │
+│  │ Objectivity  █████████░ 9/10  │                      │
+│  └──────────────────────────┘                           │
+└────────────────────────────────────────────────────────┘
+```
+
+---
+
+### 🔬 Lab 7.1: Self-Feedback with Criteria
+
+```python
+def self_feedback_with_criteria(task: str, criteria: List[str]) -> Dict:
+    """
+    Self-Feedback ด้วยเกณฑ์ที่กำหนด
+    """
+    results = {}
+    
+    # Step 1: Generate initial response
+    response1 = call_gemini(task)
+    results["initial_response"] = response1
+    print_section("Initial Response", response1, "📝")
+    
+    # Step 2: Self-Feedback based on criteria
+    criteria_text = "\n".join([f"- {c}" for c in criteria])
+    feedback_prompt = f"""
+ประเมินคำตอบต่อไปนี้ตามเกณฑ์ที่กำหนด:
+
+งาน:
+{task}
+
+คำตอบ:
+{results['initial_response']}
+
+เกณฑ์การประเมิน:
+{criteria_text}
+
+สำหรับแต่ละเกณฑ์:
+1. ให้คะแนน 1-10
+2. อธิบายเหตุผล
+3. เสนอการปรับปรุง
+
+Format:
+[เกณฑ์ 1]: [คะแนน]/10
+- เหตุผล: ...
+- การปรับปรุง: ...
+"""
+    
+    response2 = call_gemini(feedback_prompt)
+    results["self_feedback"] = response2
+    print_section("Self-Feedback", response2, "🔍")
+    
+    # Step 3: Improve based on feedback
+    improve_prompt = f"""
+ปรับปรุงคำตอบตาม feedback:
+
+งานเดิม:
+{task}
+
+คำตอบเดิม:
+{results['initial_response']}
+
+Feedback:
+{results['self_feedback']}
+
+สร้างคำตอบใหม่ที่ปรับปรุงตาม feedback ทุกข้อ
+"""
+    
+    response3 = call_gemini(improve_prompt)
+    results["improved_response"] = response3
+    print_section("Improved Response", response3, "✨")
+    
+    return results
+```
+
+#### ทดสอบ Self-Feedback
+
+```python
+writing_task = """
+เขียนบทความสั้น (200-300 คำ) เกี่ยวกับ "ผลกระทบของ AI ต่อตลาดแรงงานไทย"
+"""
+
+criteria = [
+    "ความถูกต้องของข้อมูล (Accuracy)",
+    "ความครบถ้วนของเนื้อหา (Completeness)",
+    "ความชัดเจนในการสื่อสาร (Clarity)",
+    "ความน่าสนใจ (Engagement)",
+    "ความเป็นกลาง (Objectivity)"
+]
+
+print("🔄 Starting Self-Feedback Process...")
+sf_results = self_feedback_with_criteria(writing_task, criteria)
+```
+
+---
+
+## 📘 Part 8: Self-Critique
+
+**ระดับความยาก: ⭐⭐⭐⭐⭐ (สูงมาก)**
+
+### 📖 ทฤษฎีเชิงลึก
+
+**Self-Critique** เป็นเทคนิคที่ LLM วิพากษ์คำตอบของตัวเองอย่างเข้มงวด โดยพยายามหาข้อผิดพลาด จุดอ่อน และสมมติฐานที่ผิดพลาด
+
+### 📊 Self-Critique Intensity Spectrum
+
+```
+╔══════════════════════════════════════════════════════════════════╗
+║            ⚔️ CRITIQUE INTENSITY SPECTRUM                       ║
+╠══════════════════════════════════════════════════════════════════╣
+║                                                                  ║
+║  Gentle                                           Adversarial   ║
+║  ←───────────────────────────────────────────────────────────→  ║
+║                                                                  ║
+║  Reflection    Self-Feedback    Self-Critique    Adversarial    ║
+║  "ดีแล้ว       "ตรงนี้ได้ 7/10  "ข้อนี้ผิดเพราะ  "พิสูจน์ว่า  ║
+║   แต่เพิ่ม     ควรปรับปรุง       สมมติฐานไม่มี    คำตอบนี้ผิด  ║
+║   อีกนิด"      เรื่อง..."       หลักฐานรองรับ"   ทุกประเด็น"  ║
+║                                                                  ║
+║  ✅ Best Uses:                                                   ║
+║  • Controversial topics     → ใช้ Adversarial Critique          ║
+║  • Factual writing          → ใช้ Self-Critique                 ║
+║  • Creative writing         → ใช้ Self-Feedback                 ║
+║  • Quick iteration          → ใช้ Reflection                    ║
+║                                                                  ║
+║  Checklist สิ่งที่ Self-Critique ตรวจ:                           ║
+║  □ Logical Fallacies (ตรรกะผิดพลาด)                             ║
+║  □ Unsupported Assumptions (สมมติฐานไร้หลักฐาน)                 ║
+║  □ Factual Errors (ข้อมูลผิด)                                   ║
+║  □ Weak Arguments (ข้อโต้แย้งอ่อน)                              ║
+║  □ Missing Perspectives (มุมมองที่ขาด)                          ║
+║  □ Cognitive Biases (อคติทางความคิด)                            ║
+║  □ Over-generalizations (เหมารวมเกินไป)                        ║
+║  □ Cherry-picking evidence (เลือกหลักฐานเฉพาะที่สนับสนุน)     ║
+╚══════════════════════════════════════════════════════════════════╝
+```
+
+---
+
+### 🔬 Lab 8.1: Adversarial Self-Critique
+
+```python
+def adversarial_self_critique(task: str, num_rounds: int = 2) -> Dict:
+    """
+    Self-Critique แบบ Adversarial: พยายามหักล้างคำตอบตัวเอง
+    """
+    results = {"rounds": []}
+    current_response = None
+    current_critique = None
+    
+    for round_num in range(num_rounds):
+        print(f"\n🔄 Round {round_num + 1}")
+        print("=" * 50)
+        
+        # Generate/Improve response
+        if current_response is None:
+            gen_prompt = f"{task}\n\nให้คำตอบที่ดีที่สุดของคุณ"
+        else:
+            gen_prompt = f"""
+จากการวิพากษ์:
+{current_critique}
+
+งานเดิม:
+{task}
+
+คำตอบก่อนหน้า:
+{current_response}
+
+สร้างคำตอบใหม่ที่แก้ไขปัญหาทั้งหมดที่วิพากษ์ไว้
+"""
+        
+        response = call_gemini(gen_prompt)
+        current_response = response
+        print_section("Response", current_response[:500], "📝")
+        
+        # Adversarial Critique
+        critique_prompt = f"""
+ในฐานะนักวิจารณ์ที่เข้มงวด (Harsh Critic) วิพากษ์คำตอบนี้:
+
+งาน:
+{task}
+
+คำตอบ:
+{current_response}
+
+พยายามหา:
+1. ข้อผิดพลาดทางตรรกะ (Logical Fallacies)
+2. สมมติฐานที่ไม่มีหลักฐาน (Unsupported Assumptions)
+3. ข้อมูลที่อาจไม่ถูกต้อง (Potentially Incorrect Information)
+4. จุดอ่อนในการโต้แย้ง (Weak Arguments)
+5. สิ่งที่ขาดหายไป (Missing Elements)
+6. Bias ที่อาจมี (Potential Biases)
+
+เป็นนักวิจารณ์ที่เข้มงวด - อย่าประนีประนอม!
+"""
+        
+        critique_response = call_gemini(critique_prompt)
+        current_critique = critique_response
+        print_section("Critique", current_critique[:500], "⚔️")
+        
+        results["rounds"].append({
+            "round": round_num + 1,
+            "response": current_response,
+            "critique": current_critique
+        })
+        
+        time.sleep(1)
+    
+    # Final synthesis
+    synthesis_prompt = f"""
+หลังจากผ่าน {num_rounds} รอบของการวิพากษ์และปรับปรุง
+
+งาน:
+{task}
+
+สร้างคำตอบสุดท้ายที่:
+1. รวมจุดแข็งจากทุกรอบ
+2. หลีกเลี่ยงจุดอ่อนที่ถูกวิพากษ์
+3. มีความสมดุลและรอบคอบ
+
+คำตอบรอบ 1:
+{results['rounds'][0]['response'][:500]}
+
+วิพากษ์รอบ 1:
+{results['rounds'][0]['critique'][:500]}
+
+คำตอบรอบ 2:
+{results['rounds'][-1]['response'][:500]}
+"""
+    
+    final_response = call_gemini(synthesis_prompt)
+    results["final_response"] = final_response
+    print_section("Final Response", final_response, "🏆")
+    
+    return results
+```
+
+#### ทดสอบ Self-Critique
+
+```python
+controversial_task = """
+วิเคราะห์: "บริษัทควรบังคับให้พนักงานกลับมาทำงานที่ออฟฟิศ 100% หรือไม่?"
+พิจารณาทั้งมุมมองของนายจ้างและลูกจ้าง
+"""
+
+print("⚔️ Starting Adversarial Self-Critique...")
+critique_results = adversarial_self_critique(controversial_task, num_rounds=2)
+```
+
+---
+
+## 📊 สรุปเปรียบเทียบเทคนิคทั้งหมด (Part 1–8)
+
+### 🗺️ Technique Selection Decision Tree
+
+```
+╔══════════════════════════════════════════════════════════════════╗
+║         🎯 TECHNIQUE SELECTION DECISION TREE                    ║
+╠══════════════════════════════════════════════════════════════════╣
+║                                                                  ║
+║  What type of task?                                              ║
+║  │                                                               ║
+║  ├─▶ Simple format/classification → Few-shot ⭐                  ║
+║  │                                                               ║
+║  ├─▶ Requires reasoning/math?                                   ║
+║  │   ├─▶ Low stakes → CoT ⭐⭐                                   ║
+║  │   └─▶ High stakes → Self-Consistency CoT ⭐⭐⭐                ║
+║  │                                                               ║
+║  ├─▶ Complex multi-step task?                                   ║
+║  │   └─▶ Prompt Chaining ⭐⭐⭐                                   ║
+║  │                                                               ║
+║  ├─▶ Need to explore multiple approaches?                       ║
+║  │   └─▶ Tree-of-Thought ⭐⭐⭐⭐⭐                                ║
+║  │                                                               ║
+║  └─▶ Want to improve quality iteratively?                       ║
+║      ├─▶ General improvement → Reflection ⭐⭐⭐⭐                 ║
+║      ├─▶ Criteria-based → Self-Feedback ⭐⭐⭐⭐                   ║
+║      └─▶ Find all flaws → Self-Critique ⭐⭐⭐⭐⭐                 ║
+╚══════════════════════════════════════════════════════════════════╝
+```
+
+### 📊 Technique Comparison Table
+
+| เทคนิค | ใช้เมื่อ | ความซับซ้อน | API Calls | Cost |
+|--------|---------|------------|-----------|------|
+| **Few-shot** | ต้องการ format เฉพาะ | ⭐ | 1 | ต่ำ |
+| **Chain-of-Thought** | ปัญหาต้องใช้เหตุผล | ⭐⭐ | 1 | ต่ำ |
+| **Self-Consistency** | ต้องการความมั่นใจ | ⭐⭐⭐ | N (3-10) | กลาง |
+| **Prompt Chaining** | งานซับซ้อนหลายขั้นตอน | ⭐⭐⭐ | K steps | กลาง |
+| **Reflection** | ต้องการปรับปรุงคำตอบ | ⭐⭐⭐⭐ | 3 | กลาง |
+| **Tree-of-Thought** | ปัญหามีหลายทางเลือก | ⭐⭐⭐⭐⭐ | 3-5 | สูง |
+| **Self-Feedback** | ต้องการประเมินตามเกณฑ์ | ⭐⭐⭐⭐ | 3 | กลาง |
+| **Self-Critique** | ต้องการหาจุดอ่อน | ⭐⭐⭐⭐⭐ | 4-6 | สูง |
+
+---
+
+## 📚 แหล่งเรียนรู้เพิ่มเติม
+
+### Core Papers
+
+- [Brown et al. (2020) — "Language Models are Few-Shot Learners"](https://arxiv.org/abs/2005.14165)
+- [Wei et al. (2022) — "Chain-of-Thought Prompting"](https://arxiv.org/abs/2201.11903)
+- [Wang et al. (2023) — "Self-Consistency Improves CoT"](https://arxiv.org/abs/2203.11171)
+- [Yao et al. (2023) — "Tree of Thoughts"](https://arxiv.org/abs/2305.10601)
+- [Madaan et al. (2023) — "Self-Refine"](https://arxiv.org/abs/2303.17651)
+- [Shinn et al. (2023) — "Reflexion"](https://arxiv.org/abs/2303.11366)
+
+### Guides & Documentation
+
+- [Google AI Documentation](https://ai.google.dev/)
+- [Prompt Engineering Guide](https://www.promptingguide.ai/)
+- [Anthropic Prompt Engineering Guide](https://docs.anthropic.com/claude/docs/prompt-engineering)
+
+---
+
+# 📊 Prompt Engineering Lab — Part 9-11: Evaluation Methods, Comprehensive Framework & Final Challenge
+
+## 📚 ภาพรวมเนื้อหาส่วนนี้
+
+เนื้อหาส่วนนี้ครอบคลุมระบบ **Evaluation** ขั้นสูงสำหรับประเมินคุณภาพ Output ของ LLM อย่างเป็นระบบ ตั้งแต่วิธีการแต่ละประเภท ไปจนถึงการรวมทุกวิธีเข้าเป็น Comprehensive Framework และการนำทุกเทคนิคที่เรียนมารวมกันใน Final Challenge
+
+### 🎯 Learning Outcomes ของส่วนนี้
+
+- เข้าใจและประยุกต์ใช้วิธี Evaluation 8+ วิธี (LLM-based + Automated Metrics)
+- สามารถเลือกวิธี Evaluation ที่เหมาะสมกับแต่ละ task
+- ตระหนักถึง Bias ที่เกิดขึ้นใน LLM-as-a-Judge และวิธี mitigation
+- สร้าง Comprehensive Evaluation Pipeline ที่รวมหลายวิธีเข้าด้วยกัน
+- รวมทุกเทคนิค Prompt Engineering เข้ากับ Evaluation ใน Final Challenge
+
+---
+
+## 🗺️ Lab Roadmap — ส่วน Evaluation & Capstone
+
+```
+╔══════════════════════════════════════════════════════════════════════╗
+║                                                                      ║
+║  🔴 EVALUATION (Part 9-10)                                          ║
+║  ┌──────────────────────────────────────────────────┐               ║
+║  │   Part 9: Evaluation Methods (Extended)          │               ║
+║  │   • LLM-as-a-Judge (Enhanced)                    │               ║
+║  │   • Pairwise Comparison (Position Debiased)      │               ║
+║  │   • Reference-free Evaluation                    │               ║
+║  │   • BLEU / ROUGE Score (Automated Metrics)       │               ║
+║  │   • Semantic Similarity (LLM-based)              │               ║
+║  │   • Hallucination Detection                      │               ║
+║  │   • Multi-Agent Debate Evaluation                │               ║
+║  └────────────────────────┬─────────────────────────┘               ║
+║                           ▼                                          ║
+║  ┌──────────────────────────────────────────────────┐               ║
+║  │   Part 10: Comprehensive Evaluation Framework    │               ║
+║  │   • Complete Evaluation Pipeline                 │               ║
+║  │   • Aggregation Layer                            │               ║
+║  │   • Evaluation Report Generation                 │               ║
+║  └────────────────────────┬─────────────────────────┘               ║
+║                           ▼                                          ║
+║  🏆 CAPSTONE (Part 11)                                              ║
+║  ┌──────────────────────────────────────────────────┐               ║
+║  │   Part 11: Final Challenge                       │               ║
+║  │   Combined All Techniques + Full Evaluation      │               ║
+║  │   Few-shot CoT → ToT → Reflection →              │               ║
+║  │   Self-Critique → Synthesis → Evaluation         │               ║
+║  └──────────────────────────────────────────────────┘               ║
+║                                                                      ║
+╚══════════════════════════════════════════════════════════════════════╝
+```
+
+---
+
+## 📊 Part 9: Evaluation Methods (Extended)
+
+**LLM-as-a-Judge, Reference-free, Automated Metrics & More**
+
+---
+
+### 📖 ทฤษฎีเชิงลึก: ทำไมต้อง Evaluate?
+
+```
+╔══════════════════════════════════════════════════════════════════════╗
+║              📊 WHY EVALUATION MATTERS                              ║
+╠══════════════════════════════════════════════════════════════════════╣
+║                                                                      ║
+║  "If you can't measure it, you can't improve it."                   ║
+║  — Peter Drucker                                                     ║
+║                                                                      ║
+║  ❌ Without Evaluation:         ✅ With Evaluation:                  ║
+║  • ไม่รู้ว่าดีพอหรือยัง         • วัดคุณภาพเป็นตัวเลข               ║
+║  • ไม่รู้ว่า prompt ไหนดีกว่า   • เปรียบเทียบเทคนิคได้              ║
+║  • ไม่รู้ว่า model ไหนดีกว่า   • ปรับปรุงอย่างเป็นระบบ              ║
+║  • ไม่รู้จุดอ่อนที่แท้จริง      • ค้นพบ failure modes                ║
+║  • ไม่สามารถ scale ได้        • Automate quality assurance          ║
+║                                                                      ║
+╚══════════════════════════════════════════════════════════════════════╝
+```
+
+---
+
+### 📊 Evaluation Method Taxonomy — แผนผังวิธีการ Evaluation ทั้งหมด
+
+```
+┌──────────────────────────────────────────────────────────────────┐
+│                  📊 EVALUATION TAXONOMY                          │
+│                                                                   │
+│  ┌─────────────────────────────────────────────────────────────┐ │
+│  │  1. HUMAN EVALUATION (Gold Standard)                        │ │
+│  │     • Expert review          • Crowdsourcing                │ │
+│  │     • A/B testing            • User studies                 │ │
+│  │     ✅ Most reliable  ❌ Expensive, slow, not scalable      │ │
+│  └─────────────────────────────────────────────────────────────┘ │
+│                                                                   │
+│  ┌─────────────────────────────────────────────────────────────┐ │
+│  │  2. LLM-BASED EVALUATION (Semi-automated)                  │ │
+│  │     • LLM-as-a-Judge         • Pairwise Comparison          │ │
+│  │     • Reference-free         • Rubric-based Scoring         │ │
+│  │     • Multi-agent Debate     • Hallucination Detection      │ │
+│  │     ✅ Scalable, consistent  ❌ May have biases             │ │
+│  └─────────────────────────────────────────────────────────────┘ │
+│                                                                   │
+│  ┌─────────────────────────────────────────────────────────────┐ │
+│  │  3. AUTOMATED METRICS (Fully automated)                     │ │
+│  │     • BLEU, ROUGE, METEOR    • Semantic Similarity          │ │
+│  │     • Perplexity             • F1 / Exact Match             │ │
+│  │     • BERTScore              • Factual Consistency          │ │
+│  │     ✅ Fast, cheap, reproducible  ❌ Limited aspects        │ │
+│  └─────────────────────────────────────────────────────────────┘ │
+│                                                                   │
+│  ┌─────────────────────────────────────────────────────────────┐ │
+│  │  4. TASK-SPECIFIC EVALUATION                                │ │
+│  │     • Code: pass@k, execution accuracy                     │ │
+│  │     • Math: exact match with ground truth                   │ │
+│  │     • Classification: precision, recall, F1                 │ │
+│  │     • Summarization: ROUGE-L, factual consistency           │ │
+│  │     ✅ Most relevant  ❌ Need task-specific implementation  │ │
+│  └─────────────────────────────────────────────────────────────┘ │
+└──────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+### 🔑 LLM-as-a-Judge: Known Biases — อคติที่ต้องระวัง
+
+```
+╔══════════════════════════════════════════════════════════════╗
+║          ⚠️ LLM-AS-A-JUDGE KNOWN BIASES                    ║
+╠══════════════════════════════════════════════════════════════╣
+║                                                              ║
+║  1. 📐 Verbosity Bias                                       ║
+║     LLM มักให้คะแนนคำตอบที่ยาวกว่าดีกว่า                   ║
+║     → แก้: กำหนด "ความยาวไม่ใช่เกณฑ์"                      ║
+║                                                              ║
+║  2. 🔢 Position Bias                                        ║
+║     ใน pairwise comparison มักเลือกตัวเลือกแรก             ║
+║     → แก้: สลับตำแหน่ง A/B แล้วเฉลี่ย                     ║
+║                                                              ║
+║  3. 🪞 Self-enhancement Bias                                ║
+║     LLM มักให้คะแนน output ของตัวเองสูง                    ║
+║     → แก้: ใช้ model อื่นเป็น judge                         ║
+║                                                              ║
+║  4. 📊 Anchoring Bias                                       ║
+║     คะแนนขึ้นกับ rubric/scale ที่ให้                        ║
+║     → แก้: ใช้ detailed rubric พร้อมตัวอย่าง               ║
+║                                                              ║
+║  5. 🎭 Sycophancy                                           ║
+║     LLM อาจ "เอาใจ" ผู้ถามมากเกินไป                       ║
+║     → แก้: บอกให้ "be critical and honest"                  ║
+║                                                              ║
+║  Mitigation Strategies:                                      ║
+║  ✅ ใช้ detailed rubric + ตัวอย่างคะแนน                     ║
+║  ✅ สลับตำแหน่งใน pairwise comparison                       ║
+║  ✅ ใช้หลาย judges แล้วเฉลี่ย                               ║
+║  ✅ เปรียบเทียบกับ human evaluation                          ║
+╚══════════════════════════════════════════════════════════════╝
+```
+
+---
+
+### 🔬 Lab 9.1: LLM-as-a-Judge (Enhanced)
+
+ใช้ LLM เป็นผู้ตัดสินคุณภาพของ response โดยประเมินหลายมิติพร้อม rubric ที่ปรับแต่งได้
+
+```python
+def llm_as_judge(task: str, response: str, rubric: Dict[str, str] = None) -> Dict:
+    """
+    ใช้ LLM เป็นผู้ตัดสินคุณภาพของ response (Enhanced version)
+    """
+    
+    if rubric is None:
+        rubric = {
+            "relevance": "คำตอบตรงประเด็นกับคำถามมากน้อยเพียงใด",
+            "accuracy": "ข้อมูลในคำตอบถูกต้องมากน้อยเพียงใด",
+            "completeness": "คำตอบครบถ้วนสมบูรณ์มากน้อยเพียงใด",
+            "clarity": "คำตอบชัดเจน เข้าใจง่ายมากน้อยเพียงใด",
+            "helpfulness": "คำตอบมีประโยชน์ต่อผู้ถามมากน้อยเพียงใด"
+        }
+    
+    rubric_text = "\n".join([f"- {k}: {v}" for k, v in rubric.items()])
+    
+    judge_prompt = f"""
+คุณเป็นผู้ตัดสินที่เป็นกลางและเข้มงวด ประเมินคำตอบต่อไปนี้:
+
+=== คำถาม/งาน ===
+{task}
+
+=== คำตอบที่ต้องประเมิน ===
+{response}
+
+=== เกณฑ์การประเมิน ===
+{rubric_text}
+
+กรุณาประเมินโดย:
+1. ให้คะแนนแต่ละเกณฑ์ (1-10)
+2. อธิบายเหตุผลของคะแนน
+3. ให้คะแนนรวม (1-10)
+4. สรุปจุดแข็งและจุดอ่อน
+5. ให้ข้อเสนอแนะในการปรับปรุง
+
+⚠️ สำคัญ: ความยาวของคำตอบไม่ใช่ตัวชี้วัดคุณภาพ
+ให้ประเมินจากเนื้อหาจริงเท่านั้น
+
+Format:
+SCORES:
+- relevance: [score]/10 - [reason]
+- accuracy: [score]/10 - [reason]
+- completeness: [score]/10 - [reason]
+- clarity: [score]/10 - [reason]
+- helpfulness: [score]/10 - [reason]
+
+OVERALL: [score]/10
+
+STRENGTHS:
+- ...
+
+WEAKNESSES:
+- ...
+
+SUGGESTIONS:
+- ...
+"""
+    
+    judge_response = call_gemini(judge_prompt)
+    
+    # Parse scores
+    result = {
+        "task": task,
+        "response": response,
+        "evaluation": judge_response,
+        "scores": {}
+    }
+    
+    # Extract individual scores
+    for key in rubric.keys():
+        score_match = re.search(rf'{key}:\s*(\d+(?:\.\d+)?)/10', judge_response)
+        if score_match:
+            result["scores"][key] = float(score_match.group(1))
+    
+    # Extract overall score
+    overall_match = re.search(r'OVERALL:\s*(\d+(?:\.\d+)?)/10', judge_response)
+    if overall_match:
+        result["overall_score"] = float(overall_match.group(1))
+    elif result["scores"]:
+        result["overall_score"] = sum(result["scores"].values()) / len(result["scores"])
+    
+    return result
+```
+
+#### ทดสอบ LLM-as-a-Judge
+
+```python
+test_task = "อธิบายหลักการทำงานของ Blockchain แบบเข้าใจง่าย"
+
+test_response = """
+Blockchain คือระบบบันทึกข้อมูลแบบกระจายศูนย์ เปรียบเหมือนสมุดบัญชีที่ทุกคนถือสำเนาเหมือนกัน
+
+หลักการทำงาน:
+1. เมื่อมี transaction ใหม่ ข้อมูลจะถูกรวมเป็น "block"
+2. Block จะถูกส่งให้ทุกคนในเครือข่ายตรวจสอบ
+3. เมื่อตรวจสอบผ่าน block จะถูกเชื่อมต่อกับ block ก่อนหน้า
+4. การแก้ไขข้อมูลเดิมแทบเป็นไปไม่ได้ เพราะต้องแก้ทุก block ที่ตามมา
+
+ข้อดี: โปร่งใส ปลอดภัย ไม่มีตัวกลาง
+ข้อเสีย: ใช้พลังงานมาก ช้ากว่าระบบทั่วไป
+"""
+
+print("⚖️ LLM-as-a-Judge Evaluation:")
+judge_result = llm_as_judge(test_task, test_response)
+print(judge_result["evaluation"])
+if judge_result.get("scores"):
+    print(f"\n📊 Parsed Scores: {judge_result['scores']}")
+if judge_result.get("overall_score"):
+    print(f"📊 Overall Score: {judge_result['overall_score']}/10")
+```
+
+---
+
+### 🔬 Lab 9.2: Pairwise Comparison with Position Debiasing
+
+เปรียบเทียบ 2 คำตอบ พร้อม **position bias mitigation** โดยสลับตำแหน่ง A/B แล้วเฉลี่ยผล
+
+```python
+def pairwise_comparison_debiased(task: str, response_a: str, response_b: str) -> Dict:
+    """
+    เปรียบเทียบ 2 คำตอบ พร้อม position bias mitigation
+    โดยสลับตำแหน่ง A/B แล้วเฉลี่ยผล
+    """
+    
+    def run_comparison(first: str, second: str, first_label: str, second_label: str) -> str:
+        compare_prompt = f"""
+คุณเป็นผู้ตัดสินที่เป็นกลาง เปรียบเทียบ 2 คำตอบต่อไปนี้:
+
+=== คำถาม/งาน ===
+{task}
+
+=== คำตอบ {first_label} ===
+{first}
+
+=== คำตอบ {second_label} ===
+{second}
+
+กรุณา:
+1. วิเคราะห์จุดแข็งและจุดอ่อนของแต่ละคำตอบ
+2. เปรียบเทียบในด้าน:
+   - ความถูกต้อง
+   - ความครบถ้วน
+   - ความชัดเจน
+   - ความเป็นประโยชน์
+3. ตัดสินว่าคำตอบไหนดีกว่า
+
+⚠️ ตัดสินจากคุณภาพเนื้อหา ไม่ใช่ตำแหน่ง
+ความยาวไม่ใช่ตัวชี้วัดคุณภาพ
+
+WINNER: [{first_label}/{second_label}/Tie]
+REASON: [explanation]
+"""
+        return call_gemini(compare_prompt)
+    
+    # Run 1: A first, B second
+    result_ab = run_comparison(response_a, response_b, "A", "B")
+    
+    time.sleep(1)
+    
+    # Run 2: B first, A second (swapped positions)
+    result_ba = run_comparison(response_b, response_a, "B", "A")
+    
+    # Extract winners
+    winner_ab = "A" if "WINNER: A" in result_ab.upper() or "WINNER:A" in result_ab.upper() else \
+                "B" if "WINNER: B" in result_ab.upper() or "WINNER:B" in result_ab.upper() else "Tie"
+    
+    winner_ba = "B" if "WINNER: B" in result_ba.upper() or "WINNER:B" in result_ba.upper() else \
+                "A" if "WINNER: A" in result_ba.upper() or "WINNER:A" in result_ba.upper() else "Tie"
+    
+    # Determine final winner (consistent across both orderings)
+    if winner_ab == winner_ba:
+        final_winner = winner_ab
+        confidence = "HIGH (consistent across both orderings)"
+    else:
+        final_winner = "Tie (inconsistent)"
+        confidence = "LOW (position bias detected)"
+    
+    return {
+        "task": task,
+        "run1_result": result_ab,
+        "run1_winner": winner_ab,
+        "run2_result": result_ba,
+        "run2_winner": winner_ba,
+        "final_winner": final_winner,
+        "confidence": confidence
+    }
+```
+
+#### ทดสอบ Pairwise Comparison (Debiased)
+
+```python
+comparison_task = "แนะนำวิธีประหยัดเงินสำหรับคนเริ่มต้นทำงาน"
+
+response_a = """
+วิธีประหยัดเงิน:
+1. ทำบัญชีรายรับรายจ่าย
+2. ตั้งเป้าออมเงิน 10-20% ของรายได้
+3. หลีกเลี่ยงซื้อของไม่จำเป็น
+4. ทำอาหารกินเองแทนซื้อข้าวนอกบ้าน
+5. ใช้ระบบขนส่งสาธารณะ
+"""
+
+response_b = """
+สำหรับคนเริ่มต้นทำงาน แนะนำหลัก 50/30/20:
+- 50% สำหรับค่าใช้จ่ายจำเป็น (ค่าเช่า อาหาร เดินทาง)
+- 30% สำหรับ lifestyle (ท่องเที่ยว entertainment)
+- 20% สำหรับออม/ลงทุน
+
+Tips เพิ่มเติม:
+1. เปิดบัญชีออมเงินแยกต่างหาก - ตั้ง auto transfer ทุกเดือน
+2. ใช้แอป track ค่าใช้จ่าย เช่น Money Lover
+3. รอ 24 ชั่วโมงก่อนซื้อของราคาแพง
+4. หา side income เพิ่ม
+5. ศึกษาเรื่องการลงทุนพื้นฐาน
+
+เป้าหมาย: มี Emergency Fund 3-6 เดือนภายใน 1 ปี
+"""
+
+print("🔄 Debiased Pairwise Comparison:")
+comparison_result = pairwise_comparison_debiased(comparison_task, response_a, response_b)
+print(f"\n📊 Run 1 Winner: {comparison_result['run1_winner']}")
+print(f"📊 Run 2 Winner: {comparison_result['run2_winner']}")
+print(f"🏆 Final Winner: {comparison_result['final_winner']}")
+print(f"🎯 Confidence: {comparison_result['confidence']}")
+```
+
+---
+
+### 🔬 Lab 9.3: Reference-free Evaluation
+
+ประเมินคุณภาพโดย **ไม่ต้องมีคำตอบอ้างอิง** — เหมาะกับ open-ended tasks
+
+```python
+def reference_free_evaluation(task: str, response: str, 
+                               evaluation_aspects: List[str] = None) -> Dict:
+    """
+    ประเมินคุณภาพโดยไม่ต้องมีคำตอบอ้างอิง
+    """
+    
+    if evaluation_aspects is None:
+        evaluation_aspects = [
+            "Fluency (ความลื่นไหลของภาษา)",
+            "Coherence (ความเชื่อมโยงของเนื้อหา)",
+            "Informativeness (ความให้ข้อมูล)",
+            "Factual Consistency (ความสอดคล้องของข้อเท็จจริง — ไม่ขัดแย้งกันเอง)",
+            "No Hallucination (ไม่มีการสร้างข้อมูลเท็จ)"
+        ]
+    
+    aspects_text = "\n".join([f"- {a}" for a in evaluation_aspects])
+    
+    eval_prompt = f"""
+ประเมินคุณภาพของ text ต่อไปนี้โดยไม่ต้องมีคำตอบอ้างอิง:
+
+=== Task/Context ===
+{task}
+
+=== Text to Evaluate ===
+{response}
+
+=== Evaluation Aspects ===
+{aspects_text}
+
+สำหรับแต่ละ aspect:
+1. ให้คะแนน 1-10
+2. ยกตัวอย่างประกอบจาก text
+3. ระบุปัญหาที่พบ (ถ้ามี)
+
+เพิ่มเติม:
+- ตรวจสอบ potential hallucinations (ข้อมูลที่อาจไม่จริง)
+- ระบุ claims ที่ต้องการ verification
+- ตรวจสอบ internal consistency (ข้อมูลไม่ขัดแย้งกันเอง)
+
+Format:
+[Aspect 1]: [score]/10
+- Evidence: [quote from text]
+- Issues: [problems found]
+
+...
+
+POTENTIAL HALLUCINATIONS:
+- [list suspicious claims]
+
+CLAIMS NEEDING VERIFICATION:
+- [list claims that should be fact-checked]
+
+INTERNAL CONSISTENCY: [PASS/FAIL] — [explanation]
+
+OVERALL QUALITY: [score]/10
+SUMMARY: [brief summary]
+"""
+    
+    response_eval = call_gemini(eval_prompt)
+    
+    return {
+        "task": task,
+        "response": response,
+        "reference_free_evaluation": response_eval
+    }
+```
+
+#### ทดสอบ Reference-free Evaluation
+
+```python
+test_text_task = "เขียนบทความเกี่ยวกับประวัติศาสตร์ของ Bitcoin"
+
+test_text = """
+Bitcoin ถูกสร้างขึ้นในปี 2009 โดย Satoshi Nakamoto ซึ่งเป็นนามแฝง 
+ไม่มีใครรู้ตัวตนที่แท้จริง
+
+ประวัติสำคัญ:
+- 2008: เผยแพร่ whitepaper
+- 2009: ขุด block แรก (Genesis Block) 
+- 2010: มีการซื้อพิซซ่า 2 ถาดด้วย 10,000 BTC (มูลค่าปัจจุบันหลายพันล้าน)
+- 2017: ราคาพุ่งแตะ $20,000 ครั้งแรก
+- 2021: ราคาทำ all-time high ที่ $69,000
+- 2024: มีการอนุมัติ Bitcoin ETF ในสหรัฐฯ
+
+Bitcoin ใช้เทคโนโลยี Blockchain และมี supply จำกัดที่ 21 ล้านเหรียญ
+ทำให้หลายคนมองว่าเป็น "digital gold"
+"""
+
+print("📋 Reference-free Evaluation:")
+ref_free_result = reference_free_evaluation(test_text_task, test_text)
+print(ref_free_result["reference_free_evaluation"])
+```
+
+---
+
+### 🔬 Lab 9.4: Automated Metrics — BLEU-like & ROUGE-like Scores
+
+**(Simplified implementation — ไม่ต้องใช้ external dependencies)**
+
+#### 📖 ทำความเข้าใจ Automated Metrics ก่อนเขียน Code
+
+```
+╔══════════════════════════════════════════════════════════════════╗
+║               📊 UNDERSTANDING AUTOMATED METRICS                ║
+╠══════════════════════════════════════════════════════════════════╣
+║                                                                  ║
+║  📘 BLEU (Bilingual Evaluation Understudy):                     ║
+║  • วัด: n-gram ของ candidate ที่ตรงกับ reference                ║
+║  • มุมมอง: Precision-focused                                    ║
+║  • ดูว่า: "output มีคำ/วลีจาก reference มากเท่าไหร่"          ║
+║  • ใช้กับ: Machine Translation, Text Generation                ║
+║  • Score Range: 0.0 - 1.0 (สูง = ดี)                          ║
+║                                                                  ║
+║  📗 ROUGE (Recall-Oriented Understudy for Gisting Evaluation):  ║
+║  • วัด: n-gram ของ reference ที่ปรากฏใน candidate              ║
+║  • มุมมอง: Recall-focused                                      ║
+║  • ดูว่า: "reference ถูกครอบคลุมมากเท่าไหร่"                   ║
+║  • ใช้กับ: Summarization                                        ║
+║  • Variants: ROUGE-1, ROUGE-2, ROUGE-L                        ║
+║                                                                  ║
+║  ⚖️ เปรียบเทียบ:                                                ║
+║  ┌─────────────────────────────────────────────────────┐       ║
+║  │ Reference: "แมวสีดำนอนบนเสื่อ"                       │       ║
+║  │ Candidate: "แมวดำนอนอยู่บนเสื่อสีน้ำตาล"              │       ║
+║  │                                                       │       ║
+║  │ BLEU (Precision): candidate มีคำจาก ref กี่คำ?       │       ║
+║  │ → "แมว", "นอน", "บน", "เสื่อ" = 4/6 ≈ 0.67        │       ║
+║  │                                                       │       ║
+║  │ ROUGE (Recall): ref ถูกครอบคลุมกี่คำ?                │       ║
+║  │ → "แมว", "นอน", "บน", "เสื่อ" = 4/5 = 0.80        │       ║
+║  └─────────────────────────────────────────────────────┘       ║
+║                                                                  ║
+║  ⚠️ Limitations:                                                ║
+║  • ไม่เข้าใจ meaning (synonyms ไม่ match)                      ║
+║  • ไม่เหมาะกับ open-ended tasks                                ║
+║  • ต้องมี reference (ground truth)                              ║
+║  → ใช้ร่วมกับ LLM-based evaluation เพื่อผลที่สมบูรณ์          ║
+╚══════════════════════════════════════════════════════════════════╝
+```
+
+#### Helper Function: สร้าง n-grams
+
+```python
+def simple_ngrams(text: str, n: int) -> List[Tuple]:
+    """สร้าง n-grams จาก text"""
+    words = text.lower().split()
+    return [tuple(words[i:i+n]) for i in range(len(words)-n+1)]
+```
+
+#### BLEU Score Implementation
+
+```python
+def simple_bleu(reference: str, candidate: str, max_n: int = 4) -> Dict:
+    """
+    Simplified BLEU score calculation
+    BLEU measures how many n-grams in candidate appear in reference
+    
+    ใช้สำหรับ: การแปลภาษา, งานที่มี reference answer
+    """
+    scores = {}
+    
+    for n in range(1, max_n + 1):
+        ref_ngrams = simple_ngrams(reference, n)
+        cand_ngrams = simple_ngrams(candidate, n)
+        
+        if not cand_ngrams:
+            scores[f"bleu-{n}"] = 0.0
+            continue
+        
+        ref_counter = Counter(ref_ngrams)
+        matches = 0
+        for ng in cand_ngrams:
+            if ref_counter[ng] > 0:
+                matches += 1
+                ref_counter[ng] -= 1
+        
+        scores[f"bleu-{n}"] = matches / len(cand_ngrams)
+    
+    # Brevity penalty
+    ref_len = len(reference.split())
+    cand_len = len(candidate.split())
+    bp = min(1.0, math.exp(1 - ref_len / cand_len)) if cand_len > 0 else 0
+    
+    # Geometric mean of n-gram precisions
+    valid_scores = [s for s in scores.values() if s > 0]
+    if valid_scores:
+        geo_mean = math.exp(sum(math.log(s) for s in valid_scores) / len(valid_scores))
+    else:
+        geo_mean = 0
+    
+    scores["bleu_combined"] = bp * geo_mean
+    scores["brevity_penalty"] = bp
+    
+    return scores
+```
+
+#### ROUGE-L Score Implementation (Longest Common Subsequence)
+
+```python
+def simple_rouge_l(reference: str, candidate: str) -> Dict:
+    """
+    Simplified ROUGE-L score (Longest Common Subsequence)
+    ROUGE measures how many n-grams in reference appear in candidate
+    
+    ใช้สำหรับ: Summarization
+    """
+    ref_words = reference.lower().split()
+    cand_words = candidate.lower().split()
+    
+    # LCS using dynamic programming
+    m, n = len(ref_words), len(cand_words)
+    dp = [[0] * (n + 1) for _ in range(m + 1)]
+    
+    for i in range(1, m + 1):
+        for j in range(1, n + 1):
+            if ref_words[i-1] == cand_words[j-1]:
+                dp[i][j] = dp[i-1][j-1] + 1
+            else:
+                dp[i][j] = max(dp[i-1][j], dp[i][j-1])
+    
+    lcs_length = dp[m][n]
+    
+    precision = lcs_length / n if n > 0 else 0
+    recall = lcs_length / m if m > 0 else 0
+    f1 = (2 * precision * recall) / (precision + recall) if (precision + recall) > 0 else 0
+    
+    return {
+        "rouge_l_precision": precision,
+        "rouge_l_recall": recall,
+        "rouge_l_f1": f1,
+        "lcs_length": lcs_length
+    }
+```
+
+#### ROUGE-N Score Implementation
+
+```python
+def simple_rouge_n(reference: str, candidate: str, n: int = 1) -> Dict:
+    """
+    Simplified ROUGE-N score
+    """
+    ref_ngrams = simple_ngrams(reference, n)
+    cand_ngrams = simple_ngrams(candidate, n)
+    
+    ref_counter = Counter(ref_ngrams)
+    cand_counter = Counter(cand_ngrams)
+    
+    # Count overlapping n-grams
+    overlap = 0
+    for ng in cand_counter:
+        overlap += min(cand_counter[ng], ref_counter[ng])
+    
+    precision = overlap / len(cand_ngrams) if cand_ngrams else 0
+    recall = overlap / len(ref_ngrams) if ref_ngrams else 0
+    f1 = (2 * precision * recall) / (precision + recall) if (precision + recall) > 0 else 0
+    
+    return {
+        f"rouge_{n}_precision": precision,
+        f"rouge_{n}_recall": recall,
+        f"rouge_{n}_f1": f1
+    }
+```
+
+#### ทดสอบ Automated Metrics
+
+```python
+reference_text = "Bitcoin ถูกสร้างขึ้นในปี 2009 โดยบุคคลนามแฝง Satoshi Nakamoto ใช้เทคโนโลยี Blockchain ที่มีความปลอดภัยสูง"
+candidate_text = "Bitcoin สร้างขึ้นปี 2009 โดย Satoshi Nakamoto ใช้ Blockchain เป็นเทคโนโลยีหลัก มีความปลอดภัย"
+
+print("📊 Automated Metrics:")
+print("=" * 50)
+
+bleu_scores = simple_bleu(reference_text, candidate_text)
+print("BLEU Scores:")
+for k, v in bleu_scores.items():
+    print(f"  {k}: {v:.4f}")
+
+print()
+
+rouge_l = simple_rouge_l(reference_text, candidate_text)
+print("ROUGE-L Scores:")
+for k, v in rouge_l.items():
+    print(f"  {k}: {v:.4f}" if isinstance(v, float) else f"  {k}: {v}")
+
+print()
+
+rouge_1 = simple_rouge_n(reference_text, candidate_text, n=1)
+print("ROUGE-1 Scores:")
+for k, v in rouge_1.items():
+    print(f"  {k}: {v:.4f}")
+
+rouge_2 = simple_rouge_n(reference_text, candidate_text, n=2)
+print("\nROUGE-2 Scores:")
+for k, v in rouge_2.items():
+    print(f"  {k}: {v:.4f}")
+```
+
+---
+
+### 🔬 Lab 9.5: Semantic Similarity (LLM-based)
+
+ใช้ LLM ประเมิน **semantic similarity** ระหว่าง 2 texts (ใช้แทน embedding-based similarity เมื่อไม่มี embedding model)
+
+```python
+def semantic_similarity_eval(text_a: str, text_b: str) -> Dict:
+    """
+    ใช้ LLM ประเมิน semantic similarity ระหว่าง 2 texts
+    (ใช้แทน embedding-based similarity เมื่อไม่มี embedding model)
+    """
+    
+    eval_prompt = f"""
+ประเมินความคล้ายคลึงทาง **ความหมาย** (semantic similarity) ของ 2 ข้อความต่อไปนี้:
+
+=== Text A ===
+{text_a}
+
+=== Text B ===
+{text_b}
+
+ประเมินใน 4 มิติ:
+1. **Topical Similarity** (หัวข้อเดียวกัน): 0.0 - 1.0
+2. **Information Overlap** (ข้อมูลซ้อนทับ): 0.0 - 1.0
+3. **Sentiment Alignment** (ความรู้สึกไปทางเดียวกัน): 0.0 - 1.0
+4. **Intent Match** (เจตนาตรงกัน): 0.0 - 1.0
+
+Overall Semantic Similarity: (เฉลี่ยถ่วงน้ำหนัก)
+
+Format:
+topical_similarity: [score]
+information_overlap: [score]
+sentiment_alignment: [score]
+intent_match: [score]
+overall_similarity: [score]
+explanation: [brief explanation]
+"""
+    
+    result = call_gemini(eval_prompt)
+    
+    # Extract overall similarity
+    sim_match = re.search(r'overall_similarity:\s*([\d.]+)', result)
+    overall_sim = float(sim_match.group(1)) if sim_match else None
+    
+    return {
+        "text_a": text_a[:100],
+        "text_b": text_b[:100],
+        "evaluation": result,
+        "overall_similarity": overall_sim
+    }
+```
+
+#### ทดสอบ Semantic Similarity
+
+```python
+text_a = "AI กำลังเปลี่ยนแปลงวิธีการทำงาน หลายอาชีพอาจถูกแทนที่ด้วยระบบอัตโนมัติ"
+text_b = "ปัญญาประดิษฐ์ส่งผลกระทบต่อตลาดแรงงาน งานบางประเภทอาจหายไปเนื่องจาก automation"
+
+print("🔗 Semantic Similarity Evaluation:")
+sim_result = semantic_similarity_eval(text_a, text_b)
+print(sim_result["evaluation"])
+print(f"\n📊 Overall Similarity: {sim_result['overall_similarity']}")
+```
+
+---
+
+### 🔬 Lab 9.6: Hallucination Detection (Dedicated)
+
+ตรวจจับ **Hallucination** โดยเฉพาะ — ตรวจสอบ factual claims ทุกข้อ
+
+```python
+def hallucination_detector(topic: str, text: str) -> Dict:
+    """
+    ตรวจจับ Hallucination โดยเฉพาะ
+    """
+    
+    detection_prompt = f"""
+คุณเป็นผู้เชี่ยวชาญด้านการตรวจสอบข้อเท็จจริง (Fact-checker)
+
+=== หัวข้อ ===
+{topic}
+
+=== ข้อความที่ต้องตรวจสอบ ===
+{text}
+
+กรุณาตรวจสอบทุก factual claim ในข้อความ:
+
+สำหรับแต่ละ claim ที่พบ:
+1. ระบุ claim
+2. ประเมินความน่าเชื่อถือ:
+   - ✅ VERIFIED: มั่นใจว่าถูกต้อง
+   - ⚠️ UNCERTAIN: ไม่แน่ใจ ต้องตรวจสอบ
+   - ❌ LIKELY FALSE: น่าจะไม่ถูกต้อง
+   - 🔍 UNVERIFIABLE: ไม่สามารถตรวจสอบได้
+3. อธิบายเหตุผล
+
+Format:
+CLAIM 1: "[claim text]"
+STATUS: [✅/⚠️/❌/🔍]
+REASON: [explanation]
+CORRECTION: [if false, provide correct info]
+
+...
+
+SUMMARY:
+- Total claims found: [N]
+- Verified: [N]
+- Uncertain: [N]
+- Likely False: [N]
+- Unverifiable: [N]
+
+HALLUCINATION_RISK: [LOW/MEDIUM/HIGH/CRITICAL]
+OVERALL_TRUSTWORTHINESS: [score]/10
+"""
+    
+    result = call_gemini(detection_prompt)
+    
+    # Extract risk level
+    risk_match = re.search(r'HALLUCINATION_RISK:\s*(LOW|MEDIUM|HIGH|CRITICAL)', result)
+    risk_level = risk_match.group(1) if risk_match else "UNKNOWN"
+    
+    return {
+        "topic": topic,
+        "text": text,
+        "analysis": result,
+        "hallucination_risk": risk_level
+    }
+```
+
+#### ทดสอบ Hallucination Detection
+
+```python
+test_topic = "ประวัติศาสตร์ของประเทศไทย"
+test_text_with_errors = """
+ประเทศไทยไม่เคยตกเป็นอาณานิคมของชาติตะวันตก เป็นประเทศเดียวในเอเชียตะวันออกเฉียงใต้ที่รักษาเอกราชไว้ได้
+กรุงเทพมหานครก่อตั้งโดยพระบาทสมเด็จพระพุทธยอดฟ้าจุฬาโลกมหาราช ในปี พ.ศ. 2325
+ประเทศไทยเปลี่ยนการปกครองเป็นระบอบประชาธิปไตยในปี พ.ศ. 2475
+ปัจจุบันประเทศไทยมีประชากรประมาณ 90 ล้านคน
+"""
+
+print("🔎 Hallucination Detection:")
+hallucination_result = hallucination_detector(test_topic, test_text_with_errors)
+print(hallucination_result["analysis"])
+print(f"\n⚠️ Hallucination Risk: {hallucination_result['hallucination_risk']}")
+```
+
+---
+
+### 🔬 Lab 9.7: Multi-Agent Debate Evaluation
+
+ใช้หลาย **"agents" (persona)** ประเมินคำตอบเดียวกันจากมุมมองต่างกัน แล้ว synthesize ผลลัพธ์
+
+```python
+def multi_agent_debate_eval(task: str, response: str, num_agents: int = 3) -> Dict:
+    """
+    ใช้หลาย "agents" (persona) ประเมินคำตอบเดียวกันจากมุมมองต่างกัน
+    แล้ว synthesize ผลลัพธ์
+    """
+    
+    agent_personas = [
+        {
+            "name": "Technical Expert",
+            "prompt": "คุณเป็นผู้เชี่ยวชาญด้านเทคนิค ดูความถูกต้องทางเทคนิค ความแม่นยำ และ technical depth"
+        },
+        {
+            "name": "Communication Specialist", 
+            "prompt": "คุณเป็นผู้เชี่ยวชาญด้านสื่อสาร ดูความชัดเจน การจัดระเบียบ และว่าผู้อ่านทั่วไปจะเข้าใจหรือไม่"
+        },
+        {
+            "name": "Devil's Advocate",
+            "prompt": "คุณเป็นผู้คัดค้าน ดูช่องโหว่ สมมติฐานที่ผิดพลาด bias และสิ่งที่ขาดหาย พยายามหาจุดอ่อน"
+        }
+    ]
+    
+    agent_evaluations = []
+    
+    for i, agent in enumerate(agent_personas[:num_agents]):
+        eval_prompt = f"""
+{agent['prompt']}
+
+ประเมินคำตอบนี้:
+
+Task: {task}
+Response: {response}
+
+ให้คะแนน 1-10 และอธิบายจากมุมมองของคุณ
+ระบุจุดแข็ง จุดอ่อน และข้อเสนอแนะ
+
+SCORE: [1-10]
+STRENGTHS: [list]
+WEAKNESSES: [list]
+SUGGESTIONS: [list]
+"""
+        
+        result = call_gemini(eval_prompt)
+        agent_evaluations.append({
+            "agent": agent["name"],
+            "evaluation": result
+        })
+        
+        print(f"\n👤 {agent['name']}:")
+        print(result[:300] + "..." if len(result) > 300 else result)
+        time.sleep(1)
+    
+    # Synthesize
+    all_evals = "\n\n".join([f"[{ae['agent']}]\n{ae['evaluation']}" 
+                              for ae in agent_evaluations])
+    
+    synthesis_prompt = f"""
+สรุปผลการประเมินจาก {num_agents} ผู้เชี่ยวชาญ:
+
+{all_evals}
+
+สร้างสรุป:
+1. คะแนนเฉลี่ยจากทุกผู้เชี่ยวชาญ
+2. จุดที่เห็นพ้องกัน (ทั้งจุดแข็งและจุดอ่อน)
+3. จุดที่ขัดแย้งกัน
+4. ข้อเสนอแนะสุดท้าย
+
+CONSENSUS_SCORE: [1-10]
+"""
+    
+    synthesis = call_gemini(synthesis_prompt)
+    
+    return {
+        "task": task,
+        "response": response,
+        "agent_evaluations": agent_evaluations,
+        "synthesis": synthesis
+    }
+```
+
+#### ทดสอบ Multi-Agent Debate
+
+```python
+debate_task = "อธิบาย Quantum Computing สำหรับผู้เริ่มต้น"
+debate_response = """
+Quantum Computing ใช้ qubit แทน bit ปกติ ทำให้คำนวณได้เร็วกว่าหลายล้านเท่า
+Qubit สามารถเป็นทั้ง 0 และ 1 พร้อมกัน (superposition)
+Google มี quantum computer ที่ทำงานเร็วกว่า supercomputer ทั่วไป
+ในอนาคต quantum computing จะทำให้ encryption ทั้งหมดไม่ปลอดภัย
+"""
+
+print("🤝 Multi-Agent Debate Evaluation:")
+debate_result = multi_agent_debate_eval(debate_task, debate_response, num_agents=3)
+print("\n📊 Synthesis:")
+print(debate_result["synthesis"])
+```
+
+---
+
+## 📊 Part 10: Comprehensive Evaluation Framework
+
+**รวมทุกวิธี Evaluation เข้าด้วยกัน**
+
+---
+
+### 📊 Evaluation Framework Architecture
+
+```
+╔══════════════════════════════════════════════════════════════════╗
+║          🏗️ COMPREHENSIVE EVALUATION ARCHITECTURE               ║
+╠══════════════════════════════════════════════════════════════════╣
+║                                                                  ║
+║  Input: (task, response)                                        ║
+║         │                                                        ║
+║         ├──▶ [LLM-as-Judge] ──▶ Multi-aspect scores            ║
+║         │                                                        ║
+║         ├──▶ [Reference-free] ──▶ Quality assessment            ║
+║         │                                                        ║
+║         ├──▶ [Hallucination Check] ──▶ Risk level              ║
+║         │                                                        ║
+║         ├──▶ [Automated Metrics] ──▶ BLEU/ROUGE (if ref)       ║
+║         │                                                        ║
+║         ├──▶ [Multi-Agent Debate] ──▶ Diverse perspectives     ║
+║         │                                                        ║
+║         └──▶ [Pairwise Compare] ──▶ Relative ranking           ║
+║                     │                                            ║
+║                     ▼                                            ║
+║         ┌─────────────────────────┐                             ║
+║         │  📊 AGGREGATION LAYER   │                             ║
+║         │  • Weighted average     │                             ║
+║         │  • Confidence interval  │                             ║
+║         │  • Risk assessment      │                             ║
+║         └──────────┬──────────────┘                             ║
+║                    ▼                                             ║
+║         ┌─────────────────────────┐                             ║
+║         │  📋 EVALUATION REPORT   │                             ║
+║         │  • Overall score        │                             ║
+║         │  • Dimension scores     │                             ║
+║         │  • Risk flags           │                             ║
+║         │  • Improvement areas    │                             ║
+║         │  • Recommendations      │                             ║
+║         └─────────────────────────┘                             ║
+╚══════════════════════════════════════════════════════════════════╝
+```
+
+---
+
+### 🔬 Lab 10.1: Complete Evaluation Pipeline
+
+```python
+class ComprehensiveEvaluator:
+    """
+    Evaluation Framework ที่รวมหลายวิธีเข้าด้วยกัน
+    """
+    
+    def __init__(self, model_name: str):
+        self.model_name = model_name
+    
+    def evaluate(self, task: str, response: str, 
+                 reference: str = None,
+                 include_pairwise: bool = False, 
+                 alternative_response: str = None,
+                 include_multi_agent: bool = False) -> Dict:
+        """
+        ประเมินแบบครบวงจร
+        """
+        results = {
+            "task": task,
+            "response": response,
+            "evaluations": {},
+            "flags": []
+        }
+        
+        print("🔍 Starting Comprehensive Evaluation...")
+        print("=" * 60)
+        
+        # 1. LLM-as-a-Judge (Multi-aspect)
+        print("\n📊 1. LLM-as-a-Judge Evaluation")
+        judge_result = llm_as_judge(task, response)
+        results["evaluations"]["llm_judge"] = judge_result
+        score = judge_result.get('overall_score', 'N/A')
+        print(f"   Score: {score}/10")
+        if isinstance(score, (int, float)) and score < 5:
+            results["flags"].append("⚠️ LOW QUALITY: LLM Judge score < 5")
+        
+        time.sleep(1)
+        
+        # 2. Reference-free Evaluation
+        print("\n📋 2. Reference-free Evaluation")
+        ref_free_result = reference_free_evaluation(task, response)
+        results["evaluations"]["reference_free"] = ref_free_result
+        
+        time.sleep(1)
+        
+        # 3. Hallucination Check
+        print("\n🔎 3. Hallucination Detection")
+        hallucination_result = hallucination_detector(task, response)
+        results["evaluations"]["hallucination_check"] = hallucination_result
+        if hallucination_result["hallucination_risk"] in ["HIGH", "CRITICAL"]:
+            results["flags"].append(
+                f"🚨 HALLUCINATION RISK: {hallucination_result['hallucination_risk']}"
+            )
+        
+        time.sleep(1)
+        
+        # 4. Automated Metrics (if reference provided)
+        if reference:
+            print("\n📏 4. Automated Metrics (BLEU/ROUGE)")
+            bleu = simple_bleu(reference, response)
+            rouge_l = simple_rouge_l(reference, response)
+            rouge_1 = simple_rouge_n(reference, response, n=1)
+            results["evaluations"]["automated_metrics"] = {
+                "bleu": bleu,
+                "rouge_l": rouge_l,
+                "rouge_1": rouge_1
+            }
+            print(f"   BLEU Combined: {bleu['bleu_combined']:.4f}")
+            print(f"   ROUGE-L F1: {rouge_l['rouge_l_f1']:.4f}")
+            print(f"   ROUGE-1 F1: {rouge_1['rouge_1_f1']:.4f}")
+        
+        # 5. Pairwise Comparison (if alternative provided)
+        if include_pairwise and alternative_response:
+            print("\n⚖️ 5. Pairwise Comparison (Debiased)")
+            pairwise_result = pairwise_comparison_debiased(
+                task, response, alternative_response
+            )
+            results["evaluations"]["pairwise"] = pairwise_result
+            print(f"   Winner: {pairwise_result['final_winner']}")
+            time.sleep(1)
+        
+        # 6. Multi-Agent Debate (optional)
+        if include_multi_agent:
+            print("\n🤝 6. Multi-Agent Debate")
+            debate_result = multi_agent_debate_eval(task, response, num_agents=3)
+            results["evaluations"]["multi_agent_debate"] = debate_result
+        
+        # 7. Aggregate Score
+        results["aggregate"] = self._calculate_aggregate(results)
+        
+        # 8. Generate Report
+        results["report"] = self._generate_report(results)
+        
+        return results
+    
+    def _calculate_aggregate(self, results: Dict) -> Dict:
+        """Calculate aggregate score from all evaluations"""
+        scores = []
+        
+        if "llm_judge" in results["evaluations"]:
+            judge = results["evaluations"]["llm_judge"]
+            if judge.get("overall_score"):
+                scores.append(("LLM Judge", judge["overall_score"]))
+        
+        if scores:
+            avg = sum(s[1] for s in scores) / len(scores)
+            return {
+                "average_score": round(avg, 2),
+                "individual_scores": scores,
+                "num_evaluations": len(scores),
+                "flags_count": len(results.get("flags", []))
+            }
+        return {
+            "average_score": None, 
+            "num_evaluations": 0, 
+            "flags_count": 0
+        }
+    
+    def _generate_report(self, results: Dict) -> str:
+        """Generate human-readable evaluation report"""
+        report = []
+        report.append("=" * 60)
+        report.append("📋 COMPREHENSIVE EVALUATION REPORT")
+        report.append("=" * 60)
+        
+        agg = results.get("aggregate", {})
+        report.append(f"\n📊 Overall Score: {agg.get('average_score', 'N/A')}/10")
+        report.append(f"📊 Evaluations Used: {agg.get('num_evaluations', 0)}")
+        
+        flags = results.get("flags", [])
+        if flags:
+            report.append(f"\n🚩 Flags ({len(flags)}):")
+            for f in flags:
+                report.append(f"   {f}")
+        else:
+            report.append("\n✅ No flags raised")
+        
+        if "hallucination_check" in results["evaluations"]:
+            risk = results["evaluations"]["hallucination_check"]["hallucination_risk"]
+            report.append(f"\n🔎 Hallucination Risk: {risk}")
+        
+        report.append("\n" + "=" * 60)
+        
+        return "\n".join(report)
+```
+
+#### ทดสอบ Comprehensive Evaluator
+
+```python
+evaluator = ComprehensiveEvaluator(MODEL_NAME)
+
+test_task = "อธิบายความแตกต่างระหว่าง Machine Learning กับ Deep Learning"
+
+test_response = """
+Machine Learning (ML) และ Deep Learning (DL) มีความแตกต่างกันดังนี้:
+
+Machine Learning:
+- ใช้ algorithm แบบดั้งเดิม เช่น Decision Tree, SVM, Linear Regression
+- ต้อง feature engineering ด้วยมือ
+- ใช้ข้อมูลน้อยกว่า
+- เหมาะกับปัญหาที่ไม่ซับซ้อนมาก
+
+Deep Learning:
+- ใช้ Neural Networks หลายชั้น
+- สามารถเรียนรู้ features เอง
+- ต้องการข้อมูลมาก
+- เหมาะกับ image, text, speech
+
+DL เป็น subset ของ ML ที่พัฒนาขึ้นมาเพื่อจัดการกับปัญหาที่ซับซ้อนขึ้น
+"""
+
+test_reference = """
+Machine Learning เป็นสาขาของ AI ที่ใช้ algorithms เรียนรู้จากข้อมูล 
+Deep Learning เป็น subset ของ ML ที่ใช้ neural networks หลายชั้น
+ML ต้อง feature engineering แต่ DL เรียนรู้ features เอง
+DL ต้องการข้อมูลและ computing power มากกว่า
+"""
+
+evaluation_results = evaluator.evaluate(
+    test_task, 
+    test_response,
+    reference=test_reference
+)
+
+print(evaluation_results["report"])
+```
+
+---
+
+## 🎯 Part 11: Final Challenge — Combined Techniques
+
+**รวมทุกเทคนิคที่เรียนมา**
+
+---
+
+### 📊 Challenge Architecture
+
+```
+╔══════════════════════════════════════════════════════════════════════╗
+║                 🏆 FINAL CHALLENGE PIPELINE                         ║
+╠══════════════════════════════════════════════════════════════════════╣
+║                                                                      ║
+║  Input: Complex Problem                                             ║
+║         │                                                            ║
+║  Stage 1: Few-shot CoT ──▶ Initial Analysis                        ║
+║         │                                                            ║
+║  Stage 2: Tree-of-Thought ──▶ Multiple Solutions                   ║
+║         │                                                            ║
+║  Stage 3: Reflection ──▶ Improved Plan                             ║
+║         │                                                            ║
+║  Stage 4: Self-Critique ──▶ Stress-tested Plan                     ║
+║         │                                                            ║
+║  Stage 5: Synthesis ──▶ Final Comprehensive Plan                   ║
+║         │                                                            ║
+║  Stage 6: Comprehensive Evaluation ──▶ Quality Report              ║
+║                                                                      ║
+╚══════════════════════════════════════════════════════════════════════╝
+```
+
+---
+
+### 🔬 Lab 11: Build a Complete Analysis System
+
+```python
+def advanced_analysis_system(problem: str) -> Dict:
+    """
+    ระบบวิเคราะห์ที่รวมหลายเทคนิค:
+    1. Few-shot CoT สำหรับ initial analysis
+    2. Tree-of-Thought สำหรับสร้างทางเลือก
+    3. Reflection สำหรับปรับปรุง
+    4. Self-Critique สำหรับตรวจสอบ
+    5. Synthesis สำหรับคำตอบสุดท้าย
+    6. Comprehensive Evaluation สำหรับประเมิน
+    """
+    
+    results = {"stages": {}}
+    
+    print("🚀 Starting Advanced Analysis System")
+    print("=" * 60)
+    
+    # ─────────────────────────────────────────────────────────
+    # Stage 1: Few-shot + CoT for initial analysis
+    # ─────────────────────────────────────────────────────────
+    print("\n📌 Stage 1: Initial Analysis with Few-shot CoT")
+    stage1_prompt = f"""
+วิเคราะห์ปัญหาต่อไปนี้โดยใช้ตัวอย่างเป็นแนวทาง:
+
+ตัวอย่าง:
+ปัญหา: ร้านค้าปลีกยอดขายลดลง
+วิเคราะห์:
+- ขั้นตอน 1: ระบุสาเหตุ → แข่งขันสูง, เศรษฐกิจ, พฤติกรรมผู้บริโภค
+- ขั้นตอน 2: ประเมินผลกระทบ → รายได้ลด, กำไรลด
+- ขั้นตอน 3: หาทางออก → ปรับกลยุทธ์, ลดต้นทุน
+
+ปัญหาของคุณ:
+{problem}
+
+วิเคราะห์ทีละขั้นตอนอย่างละเอียด
+"""
+    
+    response1 = call_gemini(stage1_prompt)
+    results["stages"]["initial_analysis"] = response1
+    print(response1[:500] + "...")
+    
+    time.sleep(1)
+    
+    # ─────────────────────────────────────────────────────────
+    # Stage 2: Tree-of-Thought for solutions
+    # ─────────────────────────────────────────────────────────
+    print("\n📌 Stage 2: Tree-of-Thought for Solutions")
+    stage2_prompt = f"""
+จากการวิเคราะห์:
+{results['stages']['initial_analysis'][:1000]}
+
+สร้าง 3 ทางเลือกในการแก้ปัญหา โดยแต่ละทางเลือกต้องมี:
+- แนวคิดหลัก
+- ข้อดี/ข้อเสีย
+- ความเป็นไปได้ (1-10)
+
+แล้วเลือกทางที่ดีที่สุดพร้อมเหตุผล
+"""
+    
+    response2 = call_gemini(stage2_prompt, temperature=0.5)
+    results["stages"]["solutions_tree"] = response2
+    print(response2[:500] + "...")
+    
+    time.sleep(1)
+    
+    # ─────────────────────────────────────────────────────────
+    # Stage 3: Reflection and Improvement
+    # ─────────────────────────────────────────────────────────
+    print("\n📌 Stage 3: Reflection & Improvement")
+    stage3_prompt = f"""
+ทบทวนทางออกที่เลือก:
+{results['stages']['solutions_tree'][:1000]}
+
+1. จุดแข็งของแผน
+2. จุดอ่อนที่ต้องแก้ไข
+3. ความเสี่ยงที่อาจเกิด
+4. ปรับปรุงแผนให้ดีขึ้น
+"""
+    
+    response3 = call_gemini(stage3_prompt)
+    results["stages"]["reflection"] = response3
+    print(response3[:500] + "...")
+    
+    time.sleep(1)
+    
+    # ─────────────────────────────────────────────────────────
+    # Stage 4: Self-Critique
+    # ─────────────────────────────────────────────────────────
+    print("\n📌 Stage 4: Self-Critique")
+    stage4_prompt = f"""
+ในฐานะนักวิจารณ์ที่เข้มงวด วิพากษ์แผนนี้:
+{results['stages']['reflection'][:1000]}
+
+หา:
+1. ข้อผิดพลาดทางตรรกะ
+2. สมมติฐานที่อาจผิด
+3. สิ่งที่ขาดหาย
+4. ความเสี่ยงที่มองข้าม
+"""
+    
+    response4 = call_gemini(stage4_prompt)
+    results["stages"]["critique"] = response4
+    print(response4[:500] + "...")
+    
+    time.sleep(1)
+    
+    # ─────────────────────────────────────────────────────────
+    # Stage 5: Final Synthesis
+    # ─────────────────────────────────────────────────────────
+    print("\n📌 Stage 5: Final Synthesis")
+    stage5_prompt = f"""
+สังเคราะห์ทุกอย่างที่ได้:
+
+ปัญหา: {problem}
+
+การวิเคราะห์: {results['stages']['initial_analysis'][:500]}
+ทางออก: {results['stages']['solutions_tree'][:500]}
+การปรับปรุง: {results['stages']['reflection'][:500]}
+การวิพากษ์: {results['stages']['critique'][:500]}
+
+สร้างแผนสุดท้ายที่:
+1. แก้ไขทุกจุดอ่อนที่พบ
+2. มีความเป็นไปได้สูง
+3. มี action items ที่ชัดเจน
+4. มี timeline และ KPIs
+"""
+    
+    response5 = call_gemini(stage5_prompt)
+    results["stages"]["final_plan"] = response5
+    print(response5)
+    
+    time.sleep(1)
+    
+    # ─────────────────────────────────────────────────────────
+    # Stage 6: Comprehensive Evaluation
+    # ─────────────────────────────────────────────────────────
+    print("\n📌 Stage 6: Comprehensive Evaluation")
+    eval_result = llm_as_judge(
+        problem, 
+        results["stages"]["final_plan"],
+        rubric={
+            "feasibility": "แผนนี้เป็นไปได้จริงมากน้อยเพียงใด",
+            "completeness": "แผนครบถ้วน ครอบคลุมทุกด้านหรือไม่",
+            "practicality": "มี action items ที่ปฏิบัติได้จริงหรือไม่",
+            "innovation": "มีความคิดสร้างสรรค์ แตกต่างจากแนวทางทั่วไปหรือไม่",
+            "risk_management": "มีการจัดการความเสี่ยงที่ดีหรือไม่"
+        }
+    )
+    results["evaluation"] = eval_result
+    print(eval_result["evaluation"])
+    
+    return results
+```
+
+#### ทดสอบ Advanced Analysis System
+
+```python
+complex_problem = """
+บริษัท Startup ด้าน EdTech มีแอป e-learning ที่มีผู้ใช้ 10,000 คน
+แต่ retention rate ต่ำมาก (เพียง 15% กลับมาใช้หลัง 1 เดือน)
+มีงบประมาณ 2 ล้านบาท และต้องเพิ่ม retention เป็น 40% ภายใน 6 เดือน
+ทีมมี developer 3 คน และ designer 1 คน
+"""
+
+print("🎯 Running Final Challenge...")
+final_results = advanced_analysis_system(complex_problem)
+```
+
+---
+
+## 📝 Summary & Comprehensive Cheat Sheet
+
+---
+
+### 🗺️ Technique Selection Decision Tree
+
+```
+╔══════════════════════════════════════════════════════════════════╗
+║         🎯 TECHNIQUE SELECTION DECISION TREE                    ║
+╠══════════════════════════════════════════════════════════════════╣
+║                                                                  ║
+║  What type of task?                                              ║
+║  │                                                               ║
+║  ├─▶ Simple format/classification → Few-shot ⭐                  ║
+║  │                                                               ║
+║  ├─▶ Requires reasoning/math?                                   ║
+║  │   ├─▶ Low stakes → CoT ⭐⭐                                   ║
+║  │   └─▶ High stakes → Self-Consistency CoT ⭐⭐⭐                ║
+║  │                                                               ║
+║  ├─▶ Complex multi-step task?                                   ║
+║  │   └─▶ Prompt Chaining ⭐⭐⭐                                   ║
+║  │                                                               ║
+║  ├─▶ Need to explore multiple approaches?                       ║
+║  │   └─▶ Tree-of-Thought ⭐⭐⭐⭐⭐                                ║
+║  │                                                               ║
+║  ├─▶ Want to improve quality iteratively?                       ║
+║  │   ├─▶ General improvement → Reflection ⭐⭐⭐⭐                 ║
+║  │   ├─▶ Criteria-based → Self-Feedback ⭐⭐⭐⭐                   ║
+║  │   └─▶ Find all flaws → Self-Critique ⭐⭐⭐⭐⭐                 ║
+║  │                                                               ║
+║  └─▶ Need evaluation?                                           ║
+║      ├─▶ Single output → LLM-as-Judge                           ║
+║      ├─▶ Compare options → Pairwise Comparison                  ║
+║      ├─▶ No reference → Reference-free                          ║
+║      ├─▶ With reference → BLEU/ROUGE                            ║
+║      ├─▶ Check facts → Hallucination Detection                  ║
+║      └─▶ Multiple perspectives → Multi-Agent Debate             ║
+╚══════════════════════════════════════════════════════════════════╝
+```
+
+---
+
+### 📊 Prompt Engineering Techniques Summary (Part 1–8)
+
+| เทคนิค | ใช้เมื่อ | ความซับซ้อน | API Calls | Cost |
+|--------|---------|------------|-----------|------|
+| **Few-shot** | ต้องการ format เฉพาะ | ⭐ | 1 | ต่ำ |
+| **Chain-of-Thought** | ปัญหาต้องใช้เหตุผล | ⭐⭐ | 1 | ต่ำ |
+| **Self-Consistency** | ต้องการความมั่นใจ | ⭐⭐⭐ | N (3-10) | กลาง |
+| **Prompt Chaining** | งานซับซ้อนหลายขั้นตอน | ⭐⭐⭐ | K steps | กลาง |
+| **Reflection** | ต้องการปรับปรุงคำตอบ | ⭐⭐⭐⭐ | 3 | กลาง |
+| **Tree-of-Thought** | ปัญหามีหลายทางเลือก | ⭐⭐⭐⭐⭐ | 3-5 | สูง |
+| **Self-Feedback** | ต้องการประเมินตามเกณฑ์ | ⭐⭐⭐⭐ | 3 | กลาง |
+| **Self-Critique** | ต้องการหาจุดอ่อน | ⭐⭐⭐⭐⭐ | 4-6 | สูง |
+
+### 📊 Evaluation Methods Summary (Part 9–10)
+
+| วิธี | ต้องการ Reference? | Scalable? | Best For |
+|------|-------------------|-----------|----------|
+| **LLM-as-a-Judge** | ❌ | ✅ | General quality |
+| **Pairwise Comparison** | ❌ | ✅ | Comparing 2 options |
+| **Reference-free** | ❌ | ✅ | Open-ended tasks |
+| **BLEU** | ✅ | ✅ | Translation |
+| **ROUGE** | ✅ | ✅ | Summarization |
+| **Semantic Similarity** | ❌ | ✅ | Meaning comparison |
+| **Hallucination Detection** | ❌ | ✅ | Factual accuracy |
+| **Multi-Agent Debate** | ❌ | ⚠️ | Diverse perspectives |
+| **Human Evaluation** | ❌ | ❌ | Gold standard |
+
+---
+
+### 📋 Lab Structure Summary (Part 9–11)
+
+| Part | หัวข้อ | ระดับ | Theory | Infographic | Lab Exercises |
+|------|--------|-------|--------|-------------|---------------|
+| 9 | Evaluation Methods (Extended) | ⭐⭐⭐ | Taxonomy, Biases, Metrics | ✅ Full taxonomy, Bias chart | **7 methods** (9.1–9.7) |
+| 10 | Comprehensive Framework | ⭐⭐⭐⭐ | Architecture, Aggregation | ✅ Pipeline diagram | Combined report (10.1) |
+| 11 | Final Challenge | ⭐⭐⭐⭐⭐ | Decision Tree | ✅ Challenge pipeline | Full pipeline (11.1) |
+
+### 🆕 Evaluation Techniques ทั้ง 8 วิธีที่ครอบคลุม
+
+1. **LLM-as-a-Judge (Enhanced)** — Multi-aspect scoring with customizable rubric
+2. **Position-Debiased Pairwise Comparison** — สลับตำแหน่ง A/B เพื่อลด position bias
+3. **Reference-free Evaluation** — ประเมินโดยไม่ต้องมีคำตอบอ้างอิง
+4. **BLEU Score** — n-gram precision สำหรับ translation/generation
+5. **ROUGE Score** — ROUGE-1, ROUGE-2, ROUGE-L สำหรับ summarization
+6. **Semantic Similarity (LLM-based)** — เปรียบเทียบความหมาย 4 มิติ
+7. **Hallucination Detection** — Dedicated fact-checking พร้อม risk level
+8. **Multi-Agent Debate** — ใช้หลาย persona (Technical Expert, Communication Specialist, Devil's Advocate)
+
+---
+
+## 📚 แหล่งเรียนรู้เพิ่มเติม
+
+### Core Papers
+
+- [Brown et al. (2020) — "Language Models are Few-Shot Learners"](https://arxiv.org/abs/2005.14165)
+- [Wei et al. (2022) — "Chain-of-Thought Prompting"](https://arxiv.org/abs/2201.11903)
+- [Wang et al. (2023) — "Self-Consistency Improves CoT"](https://arxiv.org/abs/2203.11171)
+- [Yao et al. (2023) — "Tree of Thoughts"](https://arxiv.org/abs/2305.10601)
+- [Madaan et al. (2023) — "Self-Refine"](https://arxiv.org/abs/2303.17651)
+- [Shinn et al. (2023) — "Reflexion"](https://arxiv.org/abs/2303.11366)
+- [Zheng et al. (2023) — "Judging LLM-as-a-Judge"](https://arxiv.org/abs/2306.05685)
+
+### Guides & Documentation
+
+- [Google AI Documentation](https://ai.google.dev/)
+- [Prompt Engineering Guide](https://www.promptingguide.ai/)
+- [Anthropic Prompt Engineering Guide](https://docs.anthropic.com/claude/docs/prompt-engineering)
+
+---
+
+## ✅ สิ่งที่ได้เรียนรู้ทั้งหมด (Part 0–11)
+
+1. ✅ เทคนิค Prompt Engineering **8 เทคนิค** พร้อมทฤษฎีเชิงลึก
+2. ✅ วิธี Evaluation **8+ วิธี** (LLM-based + Automated Metrics)
+3. ✅ การเลือกเทคนิคที่เหมาะสมกับปัญหา (Decision Tree)
+4. ✅ การรวมเทคนิคเพื่อแก้ปัญหาซับซ้อน (Final Challenge)
+5. ✅ **Bias awareness** ใน LLM evaluation (Verbosity, Position, Self-enhancement, Anchoring, Sycophancy)
+6. ✅ **Best practices** สำหรับ production use
+7. ✅ Comprehensive Evaluation Pipeline ที่รวมหลายวิธี
+8. ✅ Automated Metrics (BLEU/ROUGE) vs LLM-based Evaluation
+
