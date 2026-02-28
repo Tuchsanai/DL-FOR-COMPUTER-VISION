@@ -1306,3 +1306,5 @@ print("  Key files:")
 print("    rl_pushcube_lab.py — This lab (PPO from scratch)")
 print("    Robotics Simulation.py — Environment exploration lab")
 print("=" * 55)
+
+# %%
