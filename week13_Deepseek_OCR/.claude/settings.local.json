@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python:*)",
+      "Bash(pip show:*)",
+      "Bash(pip:*)",
+      "Bash(ldd:*)",
+      "Bash(LD_LIBRARY_PATH=/opt/venv/lib/python3.12/site-packages/nvidia/cuda_runtime/lib:$LD_LIBRARY_PATH python:*)",
+      "Bash(LD_LIBRARY_PATH=/opt/venv/lib/python3.12/site-packages/nvidia/cuda_runtime/lib:/opt/venv/lib/python3.12/site-packages/nvidia/cu13/lib:$LD_LIBRARY_PATH python:*)"
+    ]
+  }
+}
